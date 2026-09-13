@@ -2248,8 +2248,7 @@ body.cursor-dot,body.cursor-ring,body.cursor-cross{cursor:none;}body.cursor-dot 
             id="gameFrame"
             title="Schooly Game"
             allow="fullscreen; autoplay; gamepad; clipboard-write"
-            allowfullscreen
-        ></iframe>
+            ></iframe>
 
     </div>
 
@@ -2265,7 +2264,6 @@ body.cursor-dot,body.cursor-ring,body.cursor-cross{cursor:none;}body.cursor-dot 
         class="movie-frame"
         src="https://cinera.cfd/"
         title="Schooly Movies"
-        allowfullscreen
         allow="fullscreen; autoplay; encrypted-media; picture-in-picture"
         referrerpolicy="no-referrer"
     ></iframe>
@@ -3684,7 +3682,9 @@ function renderSchoolyGames(){
     gamesCount.textContent =
         `${filteredSchoolyGames.length} games`;
 
-    filteredSchoolyGames.forEach(
+    [...filteredSchoolyGames]
+        .sort((a,b) => a.name.localeCompare(b.name))
+        .forEach(
         game => {
 
             const card =
@@ -3803,7 +3803,7 @@ function renderSchoolyGames(){
                 "game-category";
 
             category.textContent =
-                "A";
+                game.name.trim().charAt(0).toUpperCase();
 
             info.appendChild(
                 name

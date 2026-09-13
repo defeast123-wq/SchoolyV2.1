@@ -5,28 +5,24 @@
     function launch() {
         const baseHref = document.getElementById("baseTag").href;
 
-        try {
-            fetch("https://cdn.jsdelivr.net/gh/web-dashers/web-dashers.github.io@main/index.html?t=" + Date.now())
-                .then(res => res.text())
-                .then(html => {
-                    // Inject <base> directly into <head> BEFORE parsing
-                    if (html.includes("<head>")) {
-                        html = html.replace(
-                            "<head>",
-                            `<head><base href="${baseHref}">`
-                        );
-                    } else {
-                        // fallback if no <head>
-                        html = `<base href="${baseHref}">` + html;
-                    }
-
-                    // Replace document
-                    document.open();
-                    document.write(html);
-                    document.close();
-                });
-        } catch (error) {
-            console.error("error:", error);
-        }
+        fetch("https://cdn.jsdelivr.net/gh/web-dashers/web-dashers.github.io@main/index.html?t=" + Date.now())
+            .then(res => {
+                if (!res.ok) throw new Error("Failed to load Web Dashers: HTTP " + res.status);
+                return res.text();
+            })
+            .then(html => {
+                if (html.includes("<head>")) {
+                    html = html.replace("<head>", `<head><base href="${baseHref}">`);
+                } else {
+                    html = `<base href="${baseHref}">` + html;
+                }
+                document.open();
+                document.write(html);
+                document.close();
+            })
+            .catch(error => {
+                console.error("Web Dashers loading error:", error);
+                document.body.innerHTML = '<div style="font-family:sans-serif;color:white;background:#111;min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px"><div><h2>Geometry Dash failed to load</h2><p>' + error.message + '</p></div></div>';
+            });
     }
 </script>

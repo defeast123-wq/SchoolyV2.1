@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Battle Karts</title>
+<style>
+html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#000}
+#gameContainer{width:100vw;height:100vh}
+</style>
+</head>
+<body>
+<div id="gameContainer"></div>
+<script src="https://cdn.jsdelivr.net/gh/faralong/all@main/battlekarts/Build/battle-karts-v25042201.loader-edit2.js"></script>
+<script>
+const config={
+ dataUrl:"https://cdn.jsdelivr.net/gh/faralong/all@main/battlekarts/Build/battle-kartss-v25042201.data.unityweb",
+ frameworkUrl:"https://cdn.jsdelivr.net/gh/faralong/all@main/battlekarts/Build/battle-karts-v25042201.framework.js.unityweb",
+ codeUrl:"https://cdn.jsdelivr.net/gh/faralong/all@main/battlekarts/Build/battle-karts-v25042201.wasm.unityweb",
+ streamingAssetsUrl:"StreamingAssets",
+ companyName:"Battle Karts",
+ productName:"Battle Karts",
+ productVersion:"25042201"
+};
+const container=document.querySelector("#gameContainer");
+createUnityInstance(container,config,()=>{}).catch(err=>console.error(err));
+</script>
+</body>
+</html>

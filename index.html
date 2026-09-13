@@ -1,0 +1,5264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Schooly</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html,body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#000;
+    font-family:"Space Grotesk",sans-serif;
+    color:white;
+}
+
+.bg-video{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    z-index:0;
+    filter:brightness(.48) saturate(1.05);
+}
+
+.overlay{
+    position:fixed;
+    inset:0;
+    z-index:1;
+    background:
+        radial-gradient(
+            circle at center,
+            rgba(0,0,0,.08) 0%,
+            rgba(0,0,0,.72) 100%
+        );
+}
+
+#particleCanvas{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    z-index:3;
+    pointer-events:none;
+}
+
+.app{
+    position:relative;
+    z-index:5;
+    width:100vw;
+    height:100vh;
+}
+
+/* =========================
+   BROWSER BAR
+========================= */
+
+.browser-bar{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:54px;
+    display:flex;
+    align-items:flex-end;
+    padding-left:12px;
+    padding-right:12px;
+    background:rgba(8,8,10,.94);
+    border-bottom:1px solid rgba(255,255,255,.08);
+    backdrop-filter:blur(18px);
+    -webkit-backdrop-filter:blur(18px);
+    box-shadow:0 8px 35px rgba(0,0,0,.3);
+    z-index:100;
+}
+
+.browser-controls{
+    height:46px;
+    display:flex;
+    align-items:center;
+    gap:5px;
+    padding-right:8px;
+}
+
+.browser-control{
+    width:28px;
+    height:28px;
+    border:none;
+    border-radius:8px;
+    background:transparent;
+    color:rgba(255,255,255,.5);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    transition:background .15s ease,color .15s ease;
+}
+
+.browser-control:hover{
+    background:rgba(255,255,255,.08);
+    color:white;
+}
+
+.browser-control svg{
+    width:16px;
+    height:16px;
+}
+
+/* =========================
+   TABS
+========================= */
+
+.tabs{
+    height:46px;
+    display:flex;
+    align-items:flex-end;
+    gap:2px;
+    min-width:0;
+    overflow-x:auto;
+    overflow-y:hidden;
+    scrollbar-width:none;
+}
+
+.tabs::-webkit-scrollbar{
+    display:none;
+}
+
+.browser-tab{
+    position:relative;
+    height:39px;
+    min-width:145px;
+    max-width:190px;
+    padding:0 12px;
+    border:none;
+    border-radius:10px 10px 0 0;
+    background:transparent;
+    color:rgba(255,255,255,.48);
+    font-family:"Space Grotesk",sans-serif;
+    font-size:12px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:9px;
+    transition:background .15s ease,color .15s ease;
+    flex-shrink:0;
+    user-select:none;
+}
+
+.browser-tab:hover{
+    color:white;
+    background:rgba(255,255,255,.08);
+}
+
+.browser-tab.active{
+    color:white;
+    background:rgba(28,28,31,.96);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+.browser-tab.active::before{
+    content:"";
+    position:absolute;
+    top:0;
+    left:12px;
+    right:12px;
+    height:2px;
+    border-radius:0 0 4px 4px;
+    background:rgba(255,255,255,.8);
+    box-shadow:0 0 10px rgba(255,255,255,.35);
+}
+
+.tab-icon{
+    width:16px;
+    height:16px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+    pointer-events:none;
+}
+
+.tab-icon svg{
+    width:15px;
+    height:15px;
+    stroke:currentColor;
+    fill:none;
+    stroke-width:1.7;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+}
+
+.tab-name{
+    flex:1;
+    text-align:left;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    pointer-events:none;
+}
+
+.tab-close{
+    width:20px;
+    height:20px;
+    border:none;
+    border-radius:5px;
+    background:transparent;
+    color:rgba(255,255,255,.35);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    flex-shrink:0;
+}
+
+.tab-close:hover{
+    background:rgba(255,255,255,.1);
+    color:white;
+}
+
+.tab-close svg{
+    width:12px;
+    height:12px;
+    stroke:currentColor;
+    fill:none;
+    stroke-width:2;
+    stroke-linecap:round;
+    pointer-events:none;
+}
+
+.new-tab{
+    width:36px;
+    height:36px;
+    margin:0 0 3px 4px;
+    border:none;
+    border-radius:9px;
+    background:transparent;
+    color:rgba(255,255,255,.5);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    flex-shrink:0;
+}
+
+.new-tab:hover{
+    background:rgba(255,255,255,.08);
+    color:white;
+}
+
+.new-tab svg{
+    width:17px;
+    height:17px;
+    stroke:currentColor;
+    fill:none;
+    stroke-width:1.8;
+    stroke-linecap:round;
+}
+
+/* =========================
+   PAGES
+========================= */
+
+.page{
+    position:absolute;
+    inset:0;
+    padding-top:54px;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+}
+
+.page.active{
+    display:flex;
+}
+
+#homePage{
+    padding-top:54px;
+}
+
+/* =========================
+   HOME BUTTONS
+========================= */
+
+.home-buttons{
+    position:relative;
+    z-index:10;
+    display:flex;
+    flex-direction:row;
+    align-items:center;
+    justify-content:center;
+    gap:14px;
+    margin-top:285px;
+    transform:translateX(0);
+}
+
+.school-button{
+    position:relative;
+    width:175px;
+    height:60px;
+    border:1px solid rgba(255,255,255,.2);
+    border-radius:16px;
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,.13),
+            rgba(255,255,255,.025)
+        );
+    backdrop-filter:blur(15px);
+    -webkit-backdrop-filter:blur(15px);
+    color:white;
+    font-family:"Space Grotesk",sans-serif;
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:.08em;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:11px;
+    overflow:hidden;
+    box-shadow:
+        0 12px 45px rgba(0,0,0,.4),
+        inset 0 1px 0 rgba(255,255,255,.12);
+    transition:
+        transform .2s ease,
+        border-color .2s ease,
+        box-shadow .2s ease;
+}
+
+
+/* =========================
+   SETTINGS BUTTON + WINDOW
+========================= */
+.settings-button .button-icon svg{width:19px;height:19px;}
+
+#settingsBackdrop{
+    position:fixed;
+    inset:0;
+    z-index:9990;
+    display:none;
+    background:rgba(0,0,0,.28);
+    backdrop-filter:blur(2px);
+}
+#settingsBackdrop.active{display:block;}
+
+#settingsWindow{
+    position:fixed;
+    z-index:9991;
+    top:50%;
+    left:50%;
+    width:min(760px,92vw);
+    height:min(650px,82vh);
+    transform:translate(-50%,-50%);
+    display:none;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,.16);
+    border-radius:18px;
+    background:rgba(12,12,15,.96);
+    color:white;
+    box-shadow:0 30px 100px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.08);
+    backdrop-filter:blur(24px);
+    -webkit-backdrop-filter:blur(24px);
+}
+#settingsWindow.active{display:flex;flex-direction:column;}
+
+.settings-titlebar{
+    height:58px;
+    min-height:58px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:0 14px 0 18px;
+    border-bottom:1px solid rgba(255,255,255,.09);
+    background:rgba(255,255,255,.035);
+    cursor:grab;
+    user-select:none;
+}
+.settings-titlebar:active{cursor:grabbing;}
+.settings-titlebar h2{font-size:15px;letter-spacing:.04em;flex:1;}
+.settings-titlebar small{font-size:11px;color:rgba(255,255,255,.38);}
+.settings-window-close{
+    width:32px;height:32px;border:1px solid rgba(255,255,255,.09);border-radius:8px;
+    background:rgba(255,255,255,.05);color:white;cursor:pointer;font-size:18px;
+}
+.settings-window-close:hover{background:rgba(255,70,70,.22);}
+
+.settings-body{display:flex;min-height:0;flex:1;}
+.settings-nav{
+    width:180px;min-width:180px;padding:12px;border-right:1px solid rgba(255,255,255,.08);
+    overflow:auto;
+}
+.settings-nav button{
+    width:100%;padding:11px 12px;margin-bottom:6px;border:1px solid transparent;border-radius:10px;
+    background:transparent;color:rgba(255,255,255,.55);text-align:left;font-family:inherit;font-size:12px;
+    cursor:pointer;
+}
+.settings-nav button:hover,.settings-nav button.active{background:rgba(255,255,255,.08);color:white;border-color:rgba(255,255,255,.08);}
+.settings-content{flex:1;overflow:auto;padding:22px;}
+.settings-section{display:none;}
+.settings-section.active{display:block;}
+.settings-section h3{font-size:20px;margin-bottom:6px;}
+.settings-section>p{font-size:12px;color:rgba(255,255,255,.48);margin-bottom:18px;line-height:1.5;}
+.settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+.settings-card{
+    padding:14px;border:1px solid rgba(255,255,255,.09);border-radius:12px;background:rgba(255,255,255,.035);
+}
+.settings-card label{display:block;font-size:12px;font-weight:600;margin-bottom:8px;}
+.settings-card select,.settings-card input,.settings-card textarea{
+    width:100%;border:1px solid rgba(255,255,255,.11);border-radius:8px;background:#09090b;color:white;
+    padding:9px 10px;font-family:inherit;font-size:12px;outline:none;
+}
+.settings-card textarea{min-height:90px;resize:vertical;}
+.settings-card select:focus,.settings-card input:focus,.settings-card textarea:focus{border-color:rgba(255,255,255,.32);}
+.settings-toggle{
+    display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.06);
+}
+.settings-toggle:last-child{border-bottom:0;}
+.settings-toggle span{font-size:12px;}
+.settings-toggle small{display:block;color:rgba(255,255,255,.38);font-size:10px;margin-top:3px;}
+.switch{position:relative;width:42px;height:24px;flex:0 0 auto;}
+.switch input{opacity:0;width:0;height:0;}
+.slider{position:absolute;inset:0;border-radius:20px;background:#29292d;cursor:pointer;transition:.2s;}
+.slider:before{content:"";position:absolute;width:18px;height:18px;left:3px;top:3px;border-radius:50%;background:#aaa;transition:.2s;}
+.switch input:checked+.slider{background:#eee;}
+.switch input:checked+.slider:before{transform:translateX(18px);background:#111;}
+.theme-preview{height:70px;border-radius:10px;margin-bottom:9px;border:1px solid rgba(255,255,255,.08);}
+.preview-dark{background:linear-gradient(135deg,#050505,#25252a);}
+.preview-light{background:linear-gradient(135deg,#f4f4f4,#bdbdbd);}
+.preview-purple{background:linear-gradient(135deg,#09050f,#6f38a5);}
+.preview-ocean{background:linear-gradient(135deg,#031015,#137b91);}
+.preview-forest{background:linear-gradient(135deg,#04100a,#2c7947);}
+.preview-sunset{background:linear-gradient(135deg,#160708,#b34c32);}
+.preview-cyber{background:linear-gradient(135deg,#02050b,#1e4e83);}
+.preview-rose{background:linear-gradient(135deg,#10060b,#9d3d70);}
+.theme-button{cursor:pointer;border:1px solid rgba(255,255,255,.08);background:transparent;color:white;border-radius:10px;padding:10px;text-align:left;font-family:inherit;}
+.theme-button:hover{border-color:rgba(255,255,255,.25);}
+.theme-button strong{font-size:12px;display:block;}.theme-button small{font-size:10px;color:rgba(255,255,255,.4);}
+.cursor-choice{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid rgba(255,255,255,.08);border-radius:10px;cursor:pointer;background:rgba(255,255,255,.025);}
+.cursor-choice:hover,.cursor-choice.selected{border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.07);}
+.cursor-preview{width:24px;height:24px;border:1px solid rgba(255,255,255,.5);border-radius:50%;position:relative;flex:0 0 auto;}
+.cursor-preview.dot:after{content:"";position:absolute;width:8px;height:8px;border-radius:50%;background:white;left:7px;top:7px;}
+.cursor-preview.cross:before,.cursor-preview.cross:after{content:"";position:absolute;background:white;left:11px;top:3px;width:1px;height:18px;}.cursor-preview.cross:after{transform:rotate(90deg);}
+.cursor-preview.ring{box-shadow:0 0 10px rgba(255,255,255,.55);}
+.cursor-preview.none{border:0;}.cursor-preview.none:after{content:"↖";font-size:21px;position:absolute;left:3px;top:-1px;color:white;}
+.mod-list{margin-top:12px;display:grid;gap:8px;}.mod-item{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid rgba(255,255,255,.08);border-radius:9px;background:rgba(255,255,255,.025);}.mod-item span{flex:1;font-size:11px;}.danger-btn,.settings-action{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:white;border-radius:8px;padding:9px 12px;cursor:pointer;font-family:inherit;font-size:11px;}.danger-btn:hover{background:rgba(255,70,70,.18);}.settings-action:hover{background:rgba(255,255,255,.11);}
+
+body[data-theme="light"]{background:#ececec;color:#111;}
+body[data-theme="light"] .bg-video{display:none;} body[data-theme="light"] .overlay{background:radial-gradient(circle at center,rgba(255,255,255,.1),rgba(220,220,220,.72));}
+body[data-theme="light"] .browser-bar{background:rgba(235,235,238,.94);color:#111;} body[data-theme="light"] .browser-tab{color:rgba(0,0,0,.5);} body[data-theme="light"] .browser-tab:hover,body[data-theme="light"] .browser-tab.active{color:#111;background:rgba(0,0,0,.06);}
+body[data-theme="light"] .school-button{background:rgba(255,255,255,.72);color:#111;border-color:rgba(0,0,0,.12);}
+body[data-theme="light"] #settingsWindow{background:rgba(248,248,250,.97);color:#111;} body[data-theme="light"] .settings-titlebar{background:rgba(0,0,0,.035);}
+body[data-theme="light"] .settings-nav{border-color:rgba(0,0,0,.08);} body[data-theme="light"] .settings-nav button{color:rgba(0,0,0,.55);} body[data-theme="light"] .settings-nav button:hover,body[data-theme="light"] .settings-nav button.active{color:#111;background:rgba(0,0,0,.07);}
+body[data-theme="light"] .settings-card,body[data-theme="light"] .mod-item{border-color:rgba(0,0,0,.1);background:rgba(0,0,0,.025);} body[data-theme="light"] .settings-card select,body[data-theme="light"] .settings-card input,body[data-theme="light"] .settings-card textarea{background:#fff;color:#111;border-color:rgba(0,0,0,.15);}
+body[data-theme="purple"] .school-button{background:linear-gradient(135deg,rgba(170,90,255,.24),rgba(70,25,100,.16));border-color:rgba(190,120,255,.35);}
+body[data-theme="ocean"] .school-button{background:linear-gradient(135deg,rgba(40,190,220,.22),rgba(5,50,70,.15));border-color:rgba(70,220,240,.3);}
+body[data-theme="forest"] .school-button{background:linear-gradient(135deg,rgba(50,190,100,.22),rgba(10,65,30,.15));border-color:rgba(80,220,120,.3);}
+body[data-theme="sunset"] .school-button{background:linear-gradient(135deg,rgba(255,100,70,.23),rgba(90,15,20,.15));border-color:rgba(255,120,90,.3);}
+body[data-theme="cyber"] .school-button{background:linear-gradient(135deg,rgba(50,130,255,.22),rgba(10,25,65,.15));border-color:rgba(80,160,255,.35);}
+body[data-theme="rose"] .school-button{background:linear-gradient(135deg,rgba(230,80,150,.22),rgba(80,15,55,.15));border-color:rgba(255,100,180,.3);}
+
+#customCursor{position:fixed;z-index:10000;pointer-events:none;display:none;transform:translate(-50%,-50%);}
+body.cursor-dot #customCursor,body.cursor-ring #customCursor,body.cursor-cross #customCursor{display:block;}
+body.cursor-dot #customCursor{width:8px;height:8px;border-radius:50%;background:white;box-shadow:0 0 12px rgba(255,255,255,.8);}
+body.cursor-ring #customCursor{width:22px;height:22px;border:1px solid white;border-radius:50%;box-shadow:0 0 13px rgba(255,255,255,.6);}
+body.cursor-cross #customCursor{width:22px;height:22px;}
+body.cursor-cross #customCursor:before,body.cursor-cross #customCursor:after{content:"";position:absolute;background:white;left:10px;top:0;width:1px;height:22px;}body.cursor-cross #customCursor:after{transform:rotate(90deg);}
+body.cursor-dot,body.cursor-ring,body.cursor-cross{cursor:none;}body.cursor-dot * ,body.cursor-ring *,body.cursor-cross *{cursor:none !important;}
+
+@media(max-width:650px){
+  #settingsWindow{width:96vw;height:88vh;}
+  .settings-nav{width:125px;min-width:125px;}
+  .settings-grid{grid-template-columns:1fr;}
+}
+
+.school-button::before{
+    content:"";
+    position:absolute;
+    width:180px;
+    height:180px;
+    left:var(--mouse-x,50%);
+    top:var(--mouse-y,50%);
+    transform:translate(-50%,-50%);
+    background:
+        radial-gradient(
+            circle,
+            rgba(255,255,255,.25) 0%,
+            rgba(255,255,255,.08) 35%,
+            transparent 70%
+        );
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .2s ease;
+}
+
+.school-button:hover::before{
+    opacity:1;
+}
+
+.school-button:hover{
+    transform:translateY(-4px) scale(1.025);
+    border-color:rgba(255,255,255,.5);
+    box-shadow:
+        0 18px 60px rgba(0,0,0,.5),
+        0 0 30px rgba(255,255,255,.08),
+        inset 0 1px 0 rgba(255,255,255,.18);
+}
+
+.school-button:active{
+    transform:scale(.97);
+}
+
+.button-icon{
+    position:relative;
+    z-index:2;
+    width:22px;
+    height:22px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.button-icon svg{
+    width:22px;
+    height:22px;
+    stroke:rgba(255,255,255,.95);
+    fill:none;
+    stroke-width:1.7;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+    filter:drop-shadow(0 0 5px rgba(255,255,255,.18));
+}
+
+.button-text{
+    position:relative;
+    z-index:2;
+}
+
+/* =========================
+   GAMES - GN-MATH STYLE
+========================= */
+
+#gamesPage{
+    padding:54px 0 0 0;
+    align-items:stretch;
+    justify-content:stretch;
+    overflow:hidden;
+}
+
+#gamesPage.active{
+    display:flex;
+}
+
+.games-shell{
+    position:absolute;
+    top:54px;
+    left:0;
+    width:100%;
+    height:calc(100vh - 54px);
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    background:
+        radial-gradient(
+            circle at 50% 0%,
+            rgba(255,255,255,.045),
+            transparent 40%
+        ),
+        rgba(5,5,7,.99);
+}
+
+.games-header{
+    flex-shrink:0;
+    padding:20px 26px 14px;
+    border-bottom:1px solid rgba(255,255,255,.08);
+    background:rgba(8,8,10,.94);
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
+    z-index:5;
+}
+
+.games-header-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:15px;
+    margin-bottom:14px;
+}
+
+.games-title{
+    font-size:25px;
+    font-weight:700;
+    letter-spacing:-.03em;
+}
+
+.games-count{
+    color:rgba(255,255,255,.35);
+    font-size:11px;
+}
+
+.games-search-row{
+    display:flex;
+    gap:9px;
+}
+
+.games-search-wrap{
+    position:relative;
+    flex:1;
+}
+
+.games-search{
+    width:100%;
+    height:43px;
+    padding:0 42px 0 15px;
+    border:1px solid rgba(255,255,255,.11);
+    border-radius:12px;
+    outline:none;
+    background:rgba(255,255,255,.055);
+    color:white;
+    font-family:"Space Grotesk",sans-serif;
+    font-size:12px;
+    transition:.18s ease;
+}
+
+.games-search::placeholder{
+    color:rgba(255,255,255,.3);
+}
+
+.games-search:focus{
+    border-color:rgba(255,255,255,.25);
+    background:rgba(255,255,255,.075);
+}
+
+.games-clear{
+    position:absolute;
+    right:8px;
+    top:50%;
+    transform:translateY(-50%);
+    width:27px;
+    height:27px;
+    border:none;
+    border-radius:7px;
+    background:transparent;
+    color:rgba(255,255,255,.35);
+    cursor:pointer;
+}
+
+.games-clear:hover{
+    background:rgba(255,255,255,.08);
+    color:white;
+}
+
+.games-action{
+    height:43px;
+    padding:0 17px;
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:12px;
+    background:rgba(255,255,255,.07);
+    color:white;
+    font-family:"Space Grotesk",sans-serif;
+    font-size:11px;
+    font-weight:600;
+    cursor:pointer;
+    transition:.18s ease;
+}
+
+.games-action:hover{
+    background:rgba(255,255,255,.13);
+    border-color:rgba(255,255,255,.24);
+}
+
+.games-categories{
+    display:flex;
+    gap:7px;
+    overflow-x:auto;
+    padding-bottom:2px;
+    scrollbar-width:none;
+}
+
+.games-categories::-webkit-scrollbar{
+    display:none;
+}
+
+.games-category{
+    flex-shrink:0;
+    padding:7px 12px;
+    border:1px solid rgba(255,255,255,.09);
+    border-radius:999px;
+    background:rgba(255,255,255,.035);
+    color:rgba(255,255,255,.48);
+    font-family:"Space Grotesk",sans-serif;
+    font-size:10px;
+    cursor:pointer;
+    transition:.16s ease;
+}
+
+.games-category:hover{
+    color:white;
+    background:rgba(255,255,255,.08);
+}
+
+.games-category.active{
+    background:white;
+    color:#050505;
+    border-color:white;
+}
+
+.games-content{
+    flex:1;
+    min-height:0;
+    overflow-y:auto;
+    padding:22px 26px 45px;
+}
+
+.games-content::-webkit-scrollbar{
+    width:7px;
+}
+
+.games-content::-webkit-scrollbar-thumb{
+    background:rgba(255,255,255,.12);
+    border-radius:20px;
+}
+
+.games-message{
+    padding:45px 20px;
+    text-align:center;
+    color:rgba(255,255,255,.35);
+    font-size:12px;
+}
+
+.games-grid{
+    display:grid;
+    grid-template-columns:repeat(5,minmax(0,1fr));
+    gap:15px;
+}
+
+.game-card{
+    min-width:0;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:15px;
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,.065),
+            rgba(255,255,255,.018)
+        );
+    cursor:pointer;
+    box-shadow:
+        0 10px 35px rgba(0,0,0,.28),
+        inset 0 1px 0 rgba(255,255,255,.05);
+    transition:
+        transform .18s ease,
+        border-color .18s ease,
+        background .18s ease;
+}
+
+.game-card:hover{
+    transform:translateY(-4px);
+    border-color:rgba(255,255,255,.24);
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,.10),
+            rgba(255,255,255,.035)
+        );
+}
+
+.game-image-wrap{
+    position:relative;
+    width:100%;
+    aspect-ratio:16 / 9;
+    background:#111;
+    overflow:hidden;
+}
+
+.game-image{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+    transition:transform .25s ease;
+}
+
+.game-card:hover .game-image{
+    transform:scale(1.045);
+}
+
+.game-image-fallback{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:
+        radial-gradient(
+            circle at 50% 40%,
+            rgba(255,255,255,.12),
+            transparent 65%
+        );
+    font-size:32px;
+    font-weight:700;
+    color:rgba(255,255,255,.55);
+}
+
+.game-info{
+    padding:11px 12px 13px;
+}
+
+.game-name{
+    font-size:12px;
+    font-weight:600;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.game-description{
+    margin-top:5px;
+    min-height:27px;
+    color:rgba(255,255,255,.35);
+    font-size:9px;
+    line-height:1.45;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+}
+
+.game-category{
+    display:inline-block;
+    margin-top:8px;
+    padding:4px 7px;
+    border-radius:6px;
+    background:rgba(255,255,255,.055);
+    color:rgba(255,255,255,.35);
+    font-size:8px;
+}
+
+/* GAME PLAYER */
+
+.game-modal{
+    position:fixed;
+    inset:0;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:70px 25px 25px;
+    background:rgba(0,0,0,.82);
+    backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
+    z-index:1000;
+}
+
+.game-modal.active{
+    display:flex;
+}
+
+.game-modal-box{
+    width:min(1400px,96vw);
+    height:min(820px,90vh);
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,.14);
+    border-radius:17px;
+    background:#050506;
+    box-shadow:0 30px 100px rgba(0,0,0,.7);
+}
+
+.game-modal-toolbar{
+    height:50px;
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:0 10px 0 15px;
+    border-bottom:1px solid rgba(255,255,255,.09);
+    background:#0b0b0d;
+}
+
+.game-modal-title{
+    flex:1;
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    font-size:12px;
+    font-weight:600;
+}
+
+.game-modal-button{
+    height:32px;
+    padding:0 11px;
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:8px;
+    background:rgba(255,255,255,.06);
+    color:white;
+    font-family:"Space Grotesk",sans-serif;
+    font-size:10px;
+    cursor:pointer;
+}
+
+.game-modal-button:hover{
+    background:rgba(255,255,255,.13);
+}
+
+.game-frame{
+    flex:1;
+    width:100%;
+    height:100%;
+    border:none;
+    background:#000;
+}
+
+@media(max-width:1200px){
+    .games-grid{
+        grid-template-columns:repeat(4,minmax(0,1fr));
+    }
+}
+
+@media(max-width:900px){
+    .games-grid{
+        grid-template-columns:repeat(3,minmax(0,1fr));
+    }
+}
+
+@media(max-width:650px){
+    .games-grid{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+    }
+
+    .games-header{
+        padding:15px;
+    }
+
+    .games-content{
+        padding:15px;
+    }
+
+    .games-action{
+        padding:0 12px;
+    }
+}
+
+@media(max-width:430px){
+    .games-grid{
+        grid-template-columns:1fr;
+    }
+}
+
+/* =========================
+   MOVIES
+========================= */
+
+#moviesPage{
+    padding:54px 0 0 0;
+    align-items:stretch;
+    justify-content:stretch;
+}
+
+#moviesPage.active{
+    display:flex;
+}
+
+.movie-frame{
+    position:absolute;
+    top:54px;
+    left:0;
+    width:100%;
+    height:calc(100vh - 54px);
+    border:none;
+    background:#000;
+    display:block;
+    z-index:10;
+}
+
+/* =========================
+   MUSIC PAGE
+========================= */
+
+#musicPage{
+    padding:54px 0 0 0;
+    align-items:stretch;
+    justify-content:stretch;
+    background:
+        radial-gradient(
+            circle at 50% 20%,
+            rgba(255,255,255,.055),
+            transparent 42%
+        ),
+        #070708;
+}
+
+#musicPage.active{
+    display:flex;
+}
+
+.music-page{
+    position:absolute;
+    top:54px;
+    left:0;
+    width:100%;
+    height:calc(100vh - 54px);
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    background:
+        linear-gradient(
+            180deg,
+            rgba(10,10,12,.98),
+            rgba(4,4,6,.99)
+        );
+}
+
+.music-top{
+    min-height:82px;
+    padding:18px 25px;
+    display:flex;
+    align-items:center;
+    gap:20px;
+    border-bottom:1px solid rgba(255,255,255,.08);
+    background:rgba(10,10,12,.82);
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
+    z-index:5;
+}
+
+.music-brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    min-width:190px;
+}
+
+.music-logo{
+    width:42px;
+    height:42px;
+    border-radius:13px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,.18),
+            rgba(255,255,255,.05)
+        );
+    border:1px solid rgba(255,255,255,.15);
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.1),
+        0 8px 30px rgba(0,0,0,.25);
+}
+
+.music-logo svg{
+    width:21px;
+    height:21px;
+    stroke:white;
+    fill:none;
+    stroke-width:1.6;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+}
+
+.music-brand-text{
+    display:flex;
+    flex-direction:column;
+}
+
+.music-brand-title{
+    font-size:18px;
+    font-weight:700;
+}
+
+.music-brand-sub{
+    font-size:10px;
+    color:rgba(255,255,255,.38);
+    margin-top:2px;
+}
+
+.music-search{
+    flex:1;
+    max-width:720px;
+    position:relative;
+}
+
+.music-search svg{
+    position:absolute;
+    left:15px;
+    top:50%;
+    transform:translateY(-50%);
+    width:17px;
+    height:17px;
+    stroke:rgba(255,255,255,.42);
+    fill:none;
+    stroke-width:1.8;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+    pointer-events:none;
+}
+
+#musicSearch{
+    width:100%;
+    height:46px;
+    padding:0 16px 0 44px;
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:13px;
+    outline:none;
+    color:white;
+    font-family:"Space Grotesk",sans-serif;
+    font-size:13px;
+    background:rgba(255,255,255,.055);
+    transition:
+        border-color .2s ease,
+        background .2s ease,
+        box-shadow .2s ease;
+}
+
+#musicSearch::placeholder{
+    color:rgba(255,255,255,.35);
+}
+
+#musicSearch:focus{
+    border-color:rgba(255,255,255,.25);
+    background:rgba(255,255,255,.075);
+    box-shadow:0 0 0 3px rgba(255,255,255,.035);
+}
+
+.search-button{
+    height:46px;
+    padding:0 20px;
+    border:1px solid rgba(255,255,255,.13);
+    border-radius:13px;
+    background:rgba(255,255,255,.08);
+    color:white;
+    font-family:"Space Grotesk",sans-serif;
+    font-size:12px;
+    font-weight:600;
+    cursor:pointer;
+    transition:.18s ease;
+}
+
+.search-button:hover{
+    background:rgba(255,255,255,.14);
+    border-color:rgba(255,255,255,.25);
+}
+
+.search-button:active{
+    transform:scale(.97);
+}
+
+.music-content{
+    flex:1;
+    min-height:0;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 320px;
+    overflow:hidden;
+}
+
+.music-results{
+    min-width:0;
+    overflow-y:auto;
+    padding:24px 28px 150px;
+}
+
+.music-results::-webkit-scrollbar{
+    width:7px;
+}
+
+.music-results::-webkit-scrollbar-track{
+    background:transparent;
+}
+
+.music-results::-webkit-scrollbar-thumb{
+    background:rgba(255,255,255,.12);
+    border-radius:20px;
+}
+
+.music-section-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:16px;
+}
+
+.music-section-title{
+    font-size:16px;
+    font-weight:600;
+}
+
+.music-section-count{
+    font-size:11px;
+    color:rgba(255,255,255,.35);
+}
+
+.music-status{
+    padding:35px 20px;
+    text-align:center;
+    color:rgba(255,255,255,.38);
+    font-size:13px;
+}
+
+.track-list{
+    display:flex;
+    flex-direction:column;
+    gap:7px;
+}
+
+.track{
+    position:relative;
+    min-height:70px;
+    padding:9px 12px;
+    display:flex;
+    align-items:center;
+    gap:13px;
+    border:1px solid transparent;
+    border-radius:13px;
+    background:rgba(255,255,255,.025);
+    cursor:pointer;
+    transition:
+        background .16s ease,
+        border-color .16s ease,
+        transform .16s ease;
+}
+
+.track:hover{
+    background:rgba(255,255,255,.07);
+    border-color:rgba(255,255,255,.08);
+}
+
+.track.playing{
+    background:rgba(255,255,255,.095);
+    border-color:rgba(255,255,255,.16);
+}
+
+.track-cover{
+    width:52px;
+    height:52px;
+    flex-shrink:0;
+    border-radius:9px;
+    object-fit:cover;
+    background:#151518;
+    box-shadow:0 5px 20px rgba(0,0,0,.25);
+}
+
+.track-info{
+    min-width:0;
+    flex:1;
+}
+
+.track-name{
+    font-size:13px;
+    font-weight:600;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.track-artist{
+    margin-top:5px;
+    font-size:11px;
+    color:rgba(255,255,255,.4);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.track-album{
+    margin-top:3px;
+    font-size:9px;
+    color:rgba(255,255,255,.22);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.track-duration{
+    font-size:10px;
+    color:rgba(255,255,255,.3);
+    min-width:40px;
+    text-align:right;
+}
+
+.track-play{
+    width:32px;
+    height:32px;
+    flex-shrink:0;
+    border:none;
+    border-radius:9px;
+    background:rgba(255,255,255,.07);
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    pointer-events:none;
+}
+
+.track-play svg{
+    width:14px;
+    height:14px;
+    stroke:currentColor;
+    fill:none;
+    stroke-width:1.8;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+}
+
+.music-queue{
+    min-width:0;
+    border-left:1px solid rgba(255,255,255,.08);
+    background:rgba(255,255,255,.018);
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+}
+
+.queue-header{
+    height:62px;
+    flex-shrink:0;
+    padding:0 18px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    border-bottom:1px solid rgba(255,255,255,.07);
+}
+
+.queue-title{
+    font-size:13px;
+    font-weight:600;
+}
+
+.clear-queue{
+    border:none;
+    background:transparent;
+    color:rgba(255,255,255,.35);
+    font-family:"Space Grotesk",sans-serif;
+    font-size:10px;
+    cursor:pointer;
+}
+
+.clear-queue:hover{
+    color:white;
+}
+
+.queue-list{
+    flex:1;
+    overflow-y:auto;
+    padding:12px;
+}
+
+.queue-list::-webkit-scrollbar{
+    width:5px;
+}
+
+.queue-list::-webkit-scrollbar-thumb{
+    background:rgba(255,255,255,.1);
+    border-radius:20px;
+}
+
+.queue-empty{
+    padding:35px 15px;
+    text-align:center;
+    color:rgba(255,255,255,.25);
+    font-size:11px;
+}
+
+.queue-item{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    padding:8px;
+    border-radius:10px;
+    cursor:pointer;
+    transition:.15s ease;
+}
+
+.queue-item:hover{
+    background:rgba(255,255,255,.055);
+}
+
+.queue-item.active{
+    background:rgba(255,255,255,.075);
+}
+
+.queue-cover{
+    width:38px;
+    height:38px;
+    border-radius:7px;
+    object-fit:cover;
+    background:#151518;
+    flex-shrink:0;
+}
+
+.queue-info{
+    min-width:0;
+    flex:1;
+}
+
+.queue-name{
+    font-size:10px;
+    font-weight:600;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.queue-artist{
+    margin-top:3px;
+    font-size:9px;
+    color:rgba(255,255,255,.32);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.queue-remove{
+    width:23px;
+    height:23px;
+    border:none;
+    border-radius:6px;
+    background:transparent;
+    color:rgba(255,255,255,.25);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    flex-shrink:0;
+}
+
+.queue-remove:hover{
+    background:rgba(255,255,255,.08);
+    color:white;
+}
+
+.queue-remove svg{
+    width:11px;
+    height:11px;
+    stroke:currentColor;
+    fill:none;
+    stroke-width:1.8;
+    stroke-linecap:round;
+}
+
+.music-player{
+    position:absolute;
+    left:0;
+    bottom:0;
+    width:100%;
+    min-height:100px;
+    padding:14px 22px;
+    display:grid;
+    grid-template-columns:minmax(200px,1fr) minmax(320px,1.5fr) minmax(160px,1fr);
+    align-items:center;
+    gap:25px;
+    border-top:1px solid rgba(255,255,255,.1);
+    background:rgba(9,9,11,.94);
+    backdrop-filter:blur(25px);
+    -webkit-backdrop-filter:blur(25px);
+    box-shadow:0 -15px 50px rgba(0,0,0,.35);
+    z-index:20;
+}
+
+.now-playing{
+    min-width:0;
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.now-cover{
+    width:55px;
+    height:55px;
+    border-radius:10px;
+    object-fit:cover;
+    background:#151518;
+    flex-shrink:0;
+}
+
+.now-info{
+    min-width:0;
+}
+
+.now-title{
+    font-size:12px;
+    font-weight:600;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.now-artist{
+    margin-top:4px;
+    font-size:10px;
+    color:rgba(255,255,255,.38);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.player-main{
+    display:flex;
+    flex-direction:column;
+    gap:9px;
+    min-width:0;
+}
+
+.player-controls{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+}
+
+.player-button{
+    width:32px;
+    height:32px;
+    border:none;
+    border-radius:50%;
+    background:transparent;
+    color:rgba(255,255,255,.7);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    transition:.15s ease;
+}
+
+.player-button:hover{
+    background:rgba(255,255,255,.08);
+    color:white;
+}
+
+.player-button.main{
+    width:39px;
+    height:39px;
+    background:white;
+    color:#090909;
+}
+
+.player-button.main:hover{
+    background:#e8e8e8;
+    transform:scale(1.04);
+}
+
+.player-button svg{
+    width:16px;
+    height:16px;
+    stroke:currentColor;
+    fill:none;
+    stroke-width:1.8;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+}
+
+.player-button.main svg{
+    width:17px;
+    height:17px;
+}
+
+.progress-row{
+    display:flex;
+    align-items:center;
+    gap:9px;
+}
+
+.time{
+    min-width:35px;
+    font-size:9px;
+    color:rgba(255,255,255,.35);
+}
+
+.time:last-child{
+    text-align:right;
+}
+
+.progress{
+    position:relative;
+    flex:1;
+    height:4px;
+    border-radius:20px;
+    background:rgba(255,255,255,.12);
+    cursor:pointer;
+}
+
+.progress-fill{
+    position:absolute;
+    left:0;
+    top:0;
+    height:100%;
+    width:0%;
+    border-radius:20px;
+    background:white;
+}
+
+.progress-dot{
+    position:absolute;
+    top:50%;
+    left:0%;
+    width:10px;
+    height:10px;
+    transform:translate(-50%,-50%);
+    border-radius:50%;
+    background:white;
+    opacity:0;
+    transition:.15s ease;
+}
+
+.progress:hover .progress-dot{
+    opacity:1;
+}
+
+.player-tools{
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap:12px;
+}
+
+.volume-icon{
+    width:17px;
+    height:17px;
+    stroke:rgba(255,255,255,.5);
+    fill:none;
+    stroke-width:1.6;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+}
+
+.volume{
+    width:100px;
+    max-width:100px;
+    accent-color:white;
+    cursor:pointer;
+}
+
+.like-button{
+    width:31px;
+    height:31px;
+    border:none;
+    border-radius:8px;
+    background:transparent;
+    color:rgba(255,255,255,.4);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+}
+
+.like-button:hover{
+    background:rgba(255,255,255,.07);
+    color:white;
+}
+
+.like-button.active{
+    color:white;
+}
+
+.like-button svg{
+    width:16px;
+    height:16px;
+    stroke:currentColor;
+    fill:none;
+    stroke-width:1.7;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width:1000px){
+
+    .music-content{
+        grid-template-columns:1fr;
+    }
+
+    .music-queue{
+        display:none;
+    }
+
+    .music-player{
+        grid-template-columns:
+            1fr
+            1.5fr
+            120px;
+
+        gap:15px;
+    }
+}
+
+@media (max-width:850px){
+
+    .browser-control{
+        display:none;
+    }
+
+    .browser-tab{
+        min-width:120px;
+    }
+
+    .home-buttons{
+        transform:translateX(0);
+        gap:9px;
+    }
+
+    .school-button{
+        width:145px;
+    }
+
+    .music-brand{
+        min-width:auto;
+    }
+
+    .music-brand-text{
+        display:none;
+    }
+
+    .music-top{
+        gap:10px;
+        padding:15px;
+    }
+
+    .music-player{
+        grid-template-columns:
+            1fr
+            1.4fr;
+
+        min-height:112px;
+    }
+
+    .player-tools{
+        display:none;
+    }
+}
+
+@media (max-width:600px){
+
+    .browser-tab{
+        min-width:105px;
+        padding:0 9px;
+    }
+
+    .tab-close{
+        display:none;
+    }
+
+    .home-buttons{
+        flex-wrap:wrap;
+        width:90vw;
+        margin-top:300px;
+    }
+
+    .school-button{
+        width:150px;
+    }
+
+    .music-top{
+        min-height:75px;
+    }
+
+    .music-logo{
+        width:38px;
+        height:38px;
+    }
+
+    .search-button{
+        padding:0 13px;
+    }
+
+    .music-results{
+        padding:18px 12px 150px;
+    }
+
+    .music-player{
+        padding:10px 12px;
+        grid-template-columns:1fr;
+        gap:8px;
+    }
+
+    .now-playing{
+        display:none;
+    }
+
+    .player-main{
+        width:100%;
+    }
+
+    .game-modal{
+        padding:60px 8px 8px;
+    }
+
+    .game-modal-box{
+        width:100%;
+        height:calc(100vh - 68px);
+        border-radius:12px;
+    }
+
+    .game-modal-button{
+        padding:0 8px;
+    }
+
+    .game-modal-button:nth-last-child(2){
+        display:none;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<video
+    class="bg-video"
+    autoplay
+    muted
+    loop
+    playsinline
+>
+    <source
+        src="https://motionbgs.com/media/6200/white-toyota-drifting.960x540.mp4"
+        type="video/mp4"
+    >
+</video>
+
+<div class="overlay"></div>
+
+<canvas id="particleCanvas"></canvas>
+
+<div class="app">
+
+<div class="browser-bar">
+
+    <div class="browser-controls">
+
+        <button class="browser-control" id="backButton" title="Back">
+            <svg viewBox="0 0 24 24">
+                <path d="M15 18l-6-6 6-6"/>
+            </svg>
+        </button>
+
+        <button class="browser-control" id="forwardButton" title="Forward">
+            <svg viewBox="0 0 24 24">
+                <path d="M9 18l6-6-6-6"/>
+            </svg>
+        </button>
+
+        <button class="browser-control" id="refreshButton" title="Refresh">
+            <svg viewBox="0 0 24 24">
+                <path d="M20 11a8.1 8.1 0 0 0-15.5-2M4 5v4h4"/>
+                <path d="M4 13a8.1 8.1 0 0 0 15.5 2M20 19v-4h-4"/>
+            </svg>
+        </button>
+
+    </div>
+
+    <div class="tabs">
+
+        <button class="browser-tab active" data-page="home">
+
+            <span class="tab-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M3 11.5L12 4l9 7.5"/>
+                    <path d="M5.5 10.5V20h13v-9.5"/>
+                    <path d="M9.5 20v-5.5h5V20"/>
+                </svg>
+            </span>
+
+            <span class="tab-name">Home</span>
+
+            <span class="tab-close">
+                <svg viewBox="0 0 24 24">
+                    <path d="M7 7l10 10M17 7L7 17"/>
+                </svg>
+            </span>
+
+        </button>
+
+        <button class="browser-tab" data-page="games">
+
+            <span class="tab-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M7 9h10a4 4 0 0 1 3.8 5.2l-1 3a2.5 2.5 0 0 1-4.4.8L14 16H10l-1.4 2a2.5 2.5 0 0 1-4.4-.8l-1-3A4 4 0 0 1 7 9z"/>
+                    <path d="M7 12v4"/>
+                    <path d="M5 14h4"/>
+                    <circle cx="16.5" cy="13" r=".8"/>
+                    <circle cx="18.5" cy="15" r=".8"/>
+                </svg>
+            </span>
+
+            <span class="tab-name">Games</span>
+
+            <span class="tab-close">
+                <svg viewBox="0 0 24 24">
+                    <path d="M7 7l10 10M17 7L7 17"/>
+                </svg>
+            </span>
+
+        </button>
+
+        <button class="browser-tab" data-page="movies">
+
+            <span class="tab-icon">
+                <svg viewBox="0 0 24 24">
+                    <rect x="3" y="5" width="18" height="14" rx="2"/>
+                    <path d="M8 5v14"/>
+                    <path d="M16 5v14"/>
+                    <path d="M3 9h5"/>
+                    <path d="M16 9h5"/>
+                    <path d="M3 15h5"/>
+                    <path d="M16 15h5"/>
+                </svg>
+            </span>
+
+            <span class="tab-name">Movies</span>
+
+            <span class="tab-close">
+                <svg viewBox="0 0 24 24">
+                    <path d="M7 7l10 10M17 7L7 17"/>
+                </svg>
+            </span>
+
+        </button>
+
+        <button class="browser-tab" data-page="music">
+
+            <span class="tab-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M9 18V6l10-2v12"/>
+                    <circle cx="6" cy="18" r="3"/>
+                    <circle cx="16" cy="16" r="3"/>
+                </svg>
+            </span>
+
+            <span class="tab-name">Music</span>
+
+            <span class="tab-close">
+                <svg viewBox="0 0 24 24">
+                    <path d="M7 7l10 10M17 7L7 17"/>
+                </svg>
+            </span>
+
+        </button>
+
+        <button class="new-tab" id="newTabButton" title="New tab">
+            <svg viewBox="0 0 24 24">
+                <path d="M12 5v14M5 12h14"/>
+            </svg>
+        </button>
+
+    </div>
+</div>
+
+<section class="page active" id="homePage">
+
+    <div class="home-buttons">
+
+        <button class="school-button" data-open="games">
+
+            <span class="button-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M7 9h10a4 4 0 0 1 3.8 5.2l-1 3a2.5 2.5 0 0 1-4.4.8L14 16H10l-1.4 2a2.5 2.5 0 0 1-4.4-.8l-1-3A4 4 0 0 1 7 9z"/>
+                    <path d="M7 12v4"/>
+                    <path d="M5 14h4"/>
+                    <circle cx="16.5" cy="13" r=".8"/>
+                    <circle cx="18.5" cy="15" r=".8"/>
+                </svg>
+            </span>
+
+            <span class="button-text">GAMES</span>
+
+        </button>
+
+        <button class="school-button" data-open="movies">
+
+            <span class="button-icon">
+                <svg viewBox="0 0 24 24">
+                    <rect x="3" y="5" width="18" height="14" rx="2"/>
+                    <path d="M8 5v14"/>
+                    <path d="M16 5v14"/>
+                    <path d="M3 9h5"/>
+                    <path d="M16 9h5"/>
+                    <path d="M3 15h5"/>
+                    <path d="M16 15h5"/>
+                </svg>
+            </span>
+
+            <span class="button-text">MOVIES</span>
+
+        </button>
+
+        <button class="school-button" data-open="music">
+
+            <span class="button-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M9 18V6l10-2v12"/>
+                    <circle cx="6" cy="18" r="3"/>
+                    <circle cx="16" cy="16" r="3"/>
+                </svg>
+            </span>
+
+            <span class="button-text">MUSIC</span>
+
+        </button>
+
+        <button class="school-button settings-button" id="settingsButton" type="button">
+            <span class="button-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z"/>
+                    <path d="M19 13.2a7.3 7.3 0 0 0 0-2.4l2-1.5-2-3.4-2.4 1a7.2 7.2 0 0 0-2.1-1.2L14.2 3h-4.4l-.3 2.7a7.2 7.2 0 0 0-2.1 1.2l-2.4-1-2 3.4 2 1.5a7.3 7.3 0 0 0 0 2.4l-2 1.5 2 3.4 2.4-1a7.2 7.2 0 0 0 2.1 1.2l.3 2.7h4.4l.3-2.7a7.2 7.2 0 0 0 2.1-1.2l2.4 1 2-3.4-2-1.5z"/>
+                </svg>
+            </span>
+            <span class="button-text">SETTINGS</span>
+        </button>
+
+    </div>
+
+</section>
+
+<!-- =========================
+     SETTINGS WINDOW
+========================= -->
+<div id="settingsBackdrop"></div>
+<div id="settingsWindow" aria-hidden="true">
+    <div class="settings-titlebar" id="settingsTitlebar">
+        <h2>Schooly Settings</h2>
+        <small>drag to move</small>
+        <button class="settings-window-close" id="settingsClose" type="button" aria-label="Close settings">×</button>
+    </div>
+    <div class="settings-body">
+        <nav class="settings-nav">
+            <button class="active" data-settings-section="appearance">Appearance</button>
+            <button data-settings-section="cursor">Custom Cursor</button>
+            <button data-settings-section="mods">Mods</button>
+            <button data-settings-section="behavior">Behavior</button>
+            <button data-settings-section="games">Games</button>
+            <button data-settings-section="advanced">Advanced</button>
+        </nav>
+        <main class="settings-content">
+            <section class="settings-section active" id="settings-appearance">
+                <h3>Themes</h3>
+                <p>Pick a look for Schooly. Your choice is saved automatically.</p>
+                <div class="settings-grid">
+                    <button class="theme-button" data-theme-choice="dark"><div class="theme-preview preview-dark"></div><strong>Midnight</strong><small>Classic black & white</small></button>
+                    <button class="theme-button" data-theme-choice="light"><div class="theme-preview preview-light"></div><strong>Light</strong><small>Clean bright interface</small></button>
+                    <button class="theme-button" data-theme-choice="purple"><div class="theme-preview preview-purple"></div><strong>Royal Purple</strong><small>Deep purple glow</small></button>
+                    <button class="theme-button" data-theme-choice="ocean"><div class="theme-preview preview-ocean"></div><strong>Ocean</strong><small>Cool blue interface</small></button>
+                    <button class="theme-button" data-theme-choice="forest"><div class="theme-preview preview-forest"></div><strong>Forest</strong><small>Green night theme</small></button>
+                    <button class="theme-button" data-theme-choice="sunset"><div class="theme-preview preview-sunset"></div><strong>Sunset</strong><small>Warm orange/red</small></button>
+                    <button class="theme-button" data-theme-choice="cyber"><div class="theme-preview preview-cyber"></div><strong>Cyber</strong><small>Electric blue</small></button>
+                    <button class="theme-button" data-theme-choice="rose"><div class="theme-preview preview-rose"></div><strong>Rose</strong><small>Pink neon</small></button>
+                </div>
+            </section>
+
+            <section class="settings-section" id="settings-cursor">
+                <h3>Custom Cursor</h3>
+                <p>Change the pointer style. The cursor is only visual and can be switched back anytime.</p>
+                <div class="settings-grid">
+                    <div class="cursor-choice" data-cursor-choice="default"><div class="cursor-preview none"></div><div><strong>Default</strong><small>Normal system pointer</small></div></div>
+                    <div class="cursor-choice" data-cursor-choice="dot"><div class="cursor-preview dot"></div><div><strong>Glow Dot</strong><small>Small glowing pointer</small></div></div>
+                    <div class="cursor-choice" data-cursor-choice="ring"><div class="cursor-preview ring"></div><div><strong>Neon Ring</strong><small>Clean ring pointer</small></div></div>
+                    <div class="cursor-choice" data-cursor-choice="cross"><div class="cursor-preview cross"></div><div><strong>Crosshair</strong><small>Minimal cross pointer</small></div></div>
+                </div>
+            </section>
+
+            <section class="settings-section" id="settings-mods">
+                <h3>Mods</h3>
+                <p>Add your own saved CSS mods. These mods stay on this browser and do not execute JavaScript.</p>
+                <div class="settings-card">
+                    <label for="modName">Mod name</label>
+                    <input id="modName" placeholder="My custom mod">
+                    <label for="modCss" style="margin-top:12px">CSS code</label>
+                    <textarea id="modCss" placeholder=".school-button { border-radius: 4px; }"></textarea>
+                    <button class="settings-action" id="addModButton" style="margin-top:10px">＋ Add mod</button>
+                </div>
+                <div class="mod-list" id="modList"></div>
+            </section>
+
+            <section class="settings-section" id="settings-behavior">
+                <h3>Behavior</h3>
+                <p>Control animations and interface behavior.</p>
+                <div class="settings-card">
+                    <div class="settings-toggle"><span>Particle background<small>Show the animated Schooly particles.</small></span><label class="switch"><input type="checkbox" id="particlesToggle" checked><span class="slider"></span></label></div>
+                    <div class="settings-toggle"><span>Button glow effects<small>Keep the mouse lighting effect on home buttons.</small></span><label class="switch"><input type="checkbox" id="glowToggle" checked><span class="slider"></span></label></div>
+                    <div class="settings-toggle"><span>Reduced motion<small>Reduce UI transitions and animations.</small></span><label class="switch"><input type="checkbox" id="motionToggle"><span class="slider"></span></label></div>
+                    <div class="settings-toggle"><span>Remember last page<small>Return to the last selected tab after refresh.</small></span><label class="switch"><input type="checkbox" id="rememberPageToggle"><span class="slider"></span></label></div>
+                </div>
+            </section>
+
+            <section class="settings-section" id="settings-games">
+                <h3>Games</h3>
+                <p>Extra controls for the Schooly game launcher.</p>
+                <div class="settings-card">
+                    <div class="settings-toggle"><span>Open games in fullscreen<small>Try fullscreen automatically when a game opens.</small></span><label class="switch"><input type="checkbox" id="gameFullscreenToggle"><span class="slider"></span></label></div>
+                    <div class="settings-toggle"><span>Confirm game launch<small>Ask before opening a game.</small></span><label class="switch"><input type="checkbox" id="gameConfirmToggle"><span class="slider"></span></label></div>
+                </div>
+            </section>
+
+            <section class="settings-section" id="settings-advanced">
+                <h3>Advanced</h3>
+                <p>Reset local Schooly preferences stored by this page.</p>
+                <div class="settings-card">
+                    <button class="danger-btn" id="resetSettingsButton">Reset all Schooly settings</button>
+                    <p style="margin:10px 0 0">This resets themes, cursor choice, toggles, and saved CSS mods.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+<div id="customCursor"></div>
+
+<!-- =========================
+     GAMES PAGE
+========================= -->
+
+<section class="page" id="gamesPage">
+
+    <div class="games-shell">
+
+        <div class="games-header">
+
+            <div class="games-header-top">
+
+                <div class="games-title">
+                    Schooly Games
+                </div>
+
+                <div class="games-count" id="gamesCount">
+                    Loading games...
+                </div>
+
+            </div>
+
+            <div class="games-search-row">
+
+                <div class="games-search-wrap">
+
+                    <input
+                        class="games-search"
+                        id="gamesSearch"
+                        type="text"
+                        placeholder="Search games..."
+                        autocomplete="off"
+                    >
+
+                    <button
+                        class="games-clear"
+                        id="gamesSearchClear"
+                        title="Clear search"
+                    >
+                        ✕
+                    </button>
+
+                </div>
+
+                <button
+                    class="games-action"
+                    id="gamesRefresh"
+                >
+                    Refresh
+                </button>
+
+            </div>
+
+            <div
+                class="games-categories"
+                id="gamesCategories"
+            ></div>
+
+        </div>
+
+        <div class="games-content">
+
+            <div
+                class="games-message"
+                id="gamesMessage"
+            >
+                Loading games...
+            </div>
+
+            <div
+                class="games-grid"
+                id="gamesGrid"
+            ></div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =========================
+     GAME PLAYER
+========================= -->
+
+<div
+    class="game-modal"
+    id="gameModal"
+    aria-hidden="true"
+>
+
+    <div class="game-modal-box">
+
+        <div class="game-modal-toolbar">
+
+            <div
+                class="game-modal-title"
+                id="gameModalTitle"
+            >
+                Game
+            </div>
+
+            <button
+                class="game-modal-button"
+                id="gameNewTab"
+            >
+                ↗ New Tab
+            </button>
+
+            <button
+                class="game-modal-button"
+                id="gameFullscreen"
+            >
+                ⛶ Fullscreen
+            </button>
+
+            <button
+                class="game-modal-button"
+                id="gameClose"
+            >
+                ✕ Close
+            </button>
+
+        </div>
+
+        <iframe
+            class="game-frame"
+            id="gameFrame"
+            title="Schooly Game"
+            allow="fullscreen; autoplay; gamepad; pointer-lock; clipboard-write"
+            allowfullscreen
+        ></iframe>
+
+    </div>
+
+</div>
+
+<!-- =========================
+     MOVIES PAGE
+========================= -->
+
+<section class="page" id="moviesPage">
+
+    <iframe
+        class="movie-frame"
+        src="https://cinera.cfd/"
+        title="Schooly Movies"
+        allowfullscreen
+        allow="fullscreen; autoplay; encrypted-media; picture-in-picture"
+        referrerpolicy="no-referrer"
+    ></iframe>
+
+</section>
+
+<!-- =========================
+     MUSIC PAGE
+========================= -->
+
+<section class="page" id="musicPage">
+
+<div class="music-page">
+
+    <div class="music-top">
+
+        <div class="music-brand">
+
+            <div class="music-logo">
+
+                <svg viewBox="0 0 24 24">
+                    <path d="M9 18V6l10-2v12"/>
+                    <circle cx="6" cy="18" r="3"/>
+                    <circle cx="16" cy="16" r="3"/>
+                </svg>
+
+            </div>
+
+            <div class="music-brand-text">
+
+                <div class="music-brand-title">
+                    Schooly Music
+                </div>
+
+                <div class="music-brand-sub">
+                    Powered by Jamendo
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="music-search">
+
+            <svg viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="6.5"/>
+                <path d="M16 16l5 5"/>
+            </svg>
+
+            <input
+                id="musicSearch"
+                type="text"
+                placeholder="Search songs, artists, albums..."
+                autocomplete="off"
+            >
+
+        </div>
+
+        <button
+            class="search-button"
+            id="searchButton"
+        >
+            Search
+        </button>
+
+    </div>
+
+    <div class="music-content">
+
+        <main class="music-results">
+
+            <div class="music-section-header">
+
+                <div class="music-section-title">
+                    Discover music
+                </div>
+
+                <div
+                    class="music-section-count"
+                    id="resultCount"
+                >
+                    Ready
+                </div>
+
+            </div>
+
+            <div
+                class="music-status"
+                id="musicStatus"
+            >
+                Search for a song, artist, album, genre, or mood.
+            </div>
+
+            <div
+                class="track-list"
+                id="trackList"
+            ></div>
+
+        </main>
+
+        <aside class="music-queue">
+
+            <div class="queue-header">
+
+                <div class="queue-title">
+                    Queue
+                </div>
+
+                <button
+                    class="clear-queue"
+                    id="clearQueue"
+                >
+                    Clear
+                </button>
+
+            </div>
+
+            <div
+                class="queue-list"
+                id="queueList"
+            >
+
+                <div class="queue-empty">
+                    Your queue is empty.
+                    <br><br>
+                    Click a song to start listening.
+                </div>
+
+            </div>
+
+        </aside>
+
+    </div>
+
+    <div class="music-player">
+
+        <div class="now-playing">
+
+            <img
+                class="now-cover"
+                id="nowCover"
+                src=""
+                alt=""
+            >
+
+            <div class="now-info">
+
+                <div
+                    class="now-title"
+                    id="nowTitle"
+                >
+                    Nothing playing
+                </div>
+
+                <div
+                    class="now-artist"
+                    id="nowArtist"
+                >
+                    Choose a song
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="player-main">
+
+            <div class="player-controls">
+
+                <button
+                    class="player-button"
+                    id="previousButton"
+                    title="Previous"
+                >
+                    <svg viewBox="0 0 24 24">
+                        <path d="M6 5v14"/>
+                        <path d="M18 6l-8 6 8 6V6z"/>
+                    </svg>
+                </button>
+
+                <button
+                    class="player-button main"
+                    id="playButton"
+                    title="Play"
+                >
+                    <svg
+                        id="playIcon"
+                        viewBox="0 0 24 24"
+                    >
+                        <path d="M8 5l11 7-11 7V5z"/>
+                    </svg>
+                </button>
+
+                <button
+                    class="player-button"
+                    id="nextButton"
+                    title="Next"
+                >
+                    <svg viewBox="0 0 24 24">
+                        <path d="M18 5v14"/>
+                        <path d="M6 6l8 6-8 6V6z"/>
+                    </svg>
+                </button>
+
+            </div>
+
+            <div class="progress-row">
+
+                <span class="time" id="currentTime">
+                    0:00
+                </span>
+
+                <div
+                    class="progress"
+                    id="progressBar"
+                >
+
+                    <div
+                        class="progress-fill"
+                        id="progressFill"
+                    ></div>
+
+                    <div
+                        class="progress-dot"
+                        id="progressDot"
+                    ></div>
+
+                </div>
+
+                <span class="time" id="totalTime">
+                    0:00
+                </span>
+
+            </div>
+
+        </div>
+
+        <div class="player-tools">
+
+            <svg
+                class="volume-icon"
+                viewBox="0 0 24 24"
+            >
+                <path d="M5 10v4h4l5 4V6l-5 4H5z"/>
+                <path d="M17 9c1.5 1.5 1.5 4.5 0 6"/>
+            </svg>
+
+            <input
+                class="volume"
+                id="volumeControl"
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value="0.8"
+            >
+
+            <button
+                class="like-button"
+                id="likeButton"
+                title="Like"
+            >
+
+                <svg viewBox="0 0 24 24">
+                    <path d="M20 12.5c0 4.5-8 8-8 8s-8-3.5-8-8a4 4 0 0 1 7-2.7A4 4 0 0 1 20 12.5z"/>
+                </svg>
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+</section>
+
+</div>
+
+<audio
+    id="audioPlayer"
+    preload="metadata"
+></audio>
+
+<script>
+
+/* =========================================================
+   SCHOOLY PARTICLE TITLE
+========================================================= */
+
+const canvas =
+    document.getElementById("particleCanvas");
+
+const ctx =
+    canvas.getContext("2d");
+
+let width = 0;
+let height = 0;
+let dpr = 1;
+
+let particles = [];
+
+const mouse = {
+    x:-1000,
+    y:-1000,
+    active:false
+};
+
+const PARTICLE_SIZE = 1.15;
+const PARTICLE_GAP = 3;
+
+const MOUSE_RADIUS = 115;
+const MOUSE_FORCE = 7;
+
+const RETURN_SPEED = 0.07;
+const FRICTION = 0.88;
+
+function resize(){
+
+    width = window.innerWidth;
+    height = window.innerHeight;
+
+    dpr =
+        Math.min(
+            window.devicePixelRatio || 1,
+            2
+        );
+
+    canvas.width =
+        width * dpr;
+
+    canvas.height =
+        height * dpr;
+
+    canvas.style.width =
+        width + "px";
+
+    canvas.style.height =
+        height + "px";
+
+    ctx.setTransform(
+        dpr,
+        0,
+        0,
+        dpr,
+        0,
+        0
+    );
+
+    createTextParticles();
+}
+
+function createTextParticles(){
+
+    const textCanvas =
+        document.createElement("canvas");
+
+    const textCtx =
+        textCanvas.getContext("2d");
+
+    textCanvas.width = width;
+    textCanvas.height = height;
+
+    const fontSize =
+        Math.min(
+            Math.max(width * .14,70),
+            170
+        );
+
+    textCtx.font =
+        `700 ${fontSize}px "Space Grotesk", sans-serif`;
+
+    textCtx.textAlign = "center";
+    textCtx.textBaseline = "middle";
+
+    textCtx.fillStyle = "#fff";
+
+    const textY =
+        height / 2 - 85;
+
+    textCtx.fillText(
+        "Schooly",
+        width / 2,
+        textY
+    );
+
+    const imageData =
+        textCtx.getImageData(
+            0,
+            0,
+            width,
+            height
+        );
+
+    particles = [];
+
+    for(
+        let y = 0;
+        y < height;
+        y += PARTICLE_GAP
+    ){
+
+        for(
+            let x = 0;
+            x < width;
+            x += PARTICLE_GAP
+        ){
+
+            const index =
+                (y * width + x) * 4;
+
+            const alpha =
+                imageData.data[index + 3];
+
+            if(alpha > 100){
+
+                particles.push({
+
+                    x:x,
+                    y:y,
+
+                    baseX:x,
+                    baseY:y,
+
+                    vx:0,
+                    vy:0,
+
+                    size:
+                        Math.random() * .8 +
+                        PARTICLE_SIZE,
+
+                    alpha:
+                        Math.random() * .35 +
+                        .65
+                });
+
+            }
+
+        }
+
+    }
+
+}
+
+window.addEventListener(
+    "mousemove",
+    event => {
+
+        mouse.x =
+            event.clientX;
+
+        mouse.y =
+            event.clientY;
+
+        mouse.active = true;
+
+    }
+);
+
+window.addEventListener(
+    "mouseleave",
+    () => {
+
+        mouse.active = false;
+
+    }
+);
+
+function updateParticle(p){
+
+    const dx =
+        p.x - mouse.x;
+
+    const dy =
+        p.y - mouse.y;
+
+    const distance =
+        Math.sqrt(
+            dx * dx +
+            dy * dy
+        );
+
+    if(
+        mouse.active &&
+        distance < MOUSE_RADIUS
+    ){
+
+        const force =
+            (
+                MOUSE_RADIUS -
+                distance
+            ) /
+            MOUSE_RADIUS;
+
+        const angle =
+            Math.atan2(
+                dy,
+                dx
+            );
+
+        const push =
+            force *
+            MOUSE_FORCE;
+
+        p.vx +=
+            Math.cos(angle) *
+            push;
+
+        p.vy +=
+            Math.sin(angle) *
+            push;
+
+    }
+
+    const homeX =
+        p.baseX - p.x;
+
+    const homeY =
+        p.baseY - p.y;
+
+    p.vx +=
+        homeX *
+        RETURN_SPEED;
+
+    p.vy +=
+        homeY *
+        RETURN_SPEED;
+
+    p.vx *= FRICTION;
+    p.vy *= FRICTION;
+
+    p.x += p.vx;
+    p.y += p.vy;
+}
+
+function draw(){
+
+    ctx.clearRect(
+        0,
+        0,
+        width,
+        height
+    );
+
+    for(
+        const p of particles
+    ){
+
+        updateParticle(p);
+
+        let alpha =
+            p.alpha;
+
+        const dx =
+            p.x - mouse.x;
+
+        const dy =
+            p.y - mouse.y;
+
+        const distance =
+            Math.sqrt(
+                dx * dx +
+                dy * dy
+            );
+
+        if(
+            mouse.active &&
+            distance < MOUSE_RADIUS
+        ){
+
+            alpha =
+                Math.min(
+                    1,
+                    alpha +
+                    (
+                        1 -
+                        distance /
+                        MOUSE_RADIUS
+                    ) * .35
+                );
+
+        }
+
+        ctx.beginPath();
+
+        ctx.arc(
+            p.x,
+            p.y,
+            p.size,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.fillStyle =
+            `rgba(255,255,255,${alpha})`;
+
+        ctx.fill();
+
+    }
+
+    requestAnimationFrame(draw);
+}
+
+/* =========================================================
+   BUTTON LIGHTING
+========================================================= */
+
+document
+.querySelectorAll(".school-button")
+.forEach(button => {
+
+    button.addEventListener(
+        "mousemove",
+        event => {
+
+            const rect =
+                button.getBoundingClientRect();
+
+            button.style.setProperty(
+                "--mouse-x",
+                (
+                    event.clientX -
+                    rect.left
+                ) + "px"
+            );
+
+            button.style.setProperty(
+                "--mouse-y",
+                (
+                    event.clientY -
+                    rect.top
+                ) + "px"
+            );
+
+        }
+    );
+
+});
+
+/* =========================================================
+   SETTINGS SYSTEM
+========================================================= */
+const settingsButton = document.getElementById("settingsButton");
+const settingsWindow = document.getElementById("settingsWindow");
+const settingsBackdrop = document.getElementById("settingsBackdrop");
+const settingsClose = document.getElementById("settingsClose");
+const settingsTitlebar = document.getElementById("settingsTitlebar");
+const customCursor = document.getElementById("customCursor");
+
+const SETTINGS_KEY = "schoolySettingsV2";
+let savedSettings = JSON.parse(localStorage.getItem(SETTINGS_KEY) || "null") || {
+    theme:"dark", cursor:"default", particles:true, glow:true, reducedMotion:false,
+    rememberPage:false, gameFullscreen:false, gameConfirm:false, mods:[]
+};
+
+function saveSettings(){ localStorage.setItem(SETTINGS_KEY, JSON.stringify(savedSettings)); }
+function applyTheme(theme){
+    savedSettings.theme = theme;
+    document.body.dataset.theme = theme === "dark" ? "" : theme;
+    saveSettings();
+}
+function applyCursor(cursor){
+    document.body.classList.remove("cursor-dot","cursor-ring","cursor-cross");
+    if(cursor !== "default") document.body.classList.add("cursor-"+cursor);
+    savedSettings.cursor = cursor;
+    saveSettings();
+}
+function applyBehavior(){
+    const canvas = document.getElementById("particleCanvas");
+    if(canvas) canvas.style.display = savedSettings.particles ? "block" : "none";
+    document.body.classList.toggle("reduced-motion", !!savedSettings.reducedMotion);
+    const styleId = "schooly-settings-style";
+    let style = document.getElementById(styleId);
+    if(!style){ style=document.createElement("style"); style.id=styleId; document.head.appendChild(style); }
+    style.textContent = savedSettings.glow ? "" : ".school-button::before{display:none!important;} .school-button:hover{transform:none!important;}";
+}
+function syncSettingsUI(){
+    document.querySelectorAll("[data-theme-choice]").forEach(b=>b.style.outline = b.dataset.themeChoice===savedSettings.theme ? "1px solid rgba(255,255,255,.55)" : "none");
+    document.querySelectorAll("[data-cursor-choice]").forEach(b=>b.classList.toggle("selected", b.dataset.cursorChoice===savedSettings.cursor));
+    const map={particlesToggle:"particles",glowToggle:"glow",motionToggle:"reducedMotion",rememberPageToggle:"rememberPage",gameFullscreenToggle:"gameFullscreen",gameConfirmToggle:"gameConfirm"};
+    Object.entries(map).forEach(([id,key])=>{const el=document.getElementById(id);if(el)el.checked=!!savedSettings[key];});
+}
+function openSettings(){
+    settingsWindow.classList.add("active"); settingsBackdrop.classList.add("active"); settingsWindow.setAttribute("aria-hidden","false");
+    syncSettingsUI(); renderMods();
+}
+function closeSettings(){
+    settingsWindow.classList.remove("active"); settingsBackdrop.classList.remove("active"); settingsWindow.setAttribute("aria-hidden","true");
+}
+settingsButton.addEventListener("click", openSettings); settingsClose.addEventListener("click", closeSettings); settingsBackdrop.addEventListener("click", closeSettings);
+
+document.querySelectorAll("[data-settings-section]").forEach(btn=>btn.addEventListener("click",()=>{
+    document.querySelectorAll(".settings-nav button").forEach(b=>b.classList.remove("active"));
+    document.querySelectorAll(".settings-section").forEach(s=>s.classList.remove("active"));
+    btn.classList.add("active"); document.getElementById("settings-"+btn.dataset.settingsSection).classList.add("active");
+}));
+
+document.querySelectorAll("[data-theme-choice]").forEach(btn=>btn.addEventListener("click",()=>{applyTheme(btn.dataset.themeChoice);syncSettingsUI();}));
+document.querySelectorAll("[data-cursor-choice]").forEach(btn=>btn.addEventListener("click",()=>{applyCursor(btn.dataset.cursorChoice);syncSettingsUI();}));
+
+["particlesToggle","glowToggle","motionToggle","rememberPageToggle","gameFullscreenToggle","gameConfirmToggle"].forEach(id=>{
+    const el=document.getElementById(id); el.addEventListener("change",()=>{
+        const key={particlesToggle:"particles",glowToggle:"glow",motionToggle:"reducedMotion",rememberPageToggle:"rememberPage",gameFullscreenToggle:"gameFullscreen",gameConfirmToggle:"gameConfirm"}[id];
+        savedSettings[key]=el.checked; saveSettings(); applyBehavior();
+    });
+});
+
+function renderMods(){
+    const list=document.getElementById("modList"); list.innerHTML="";
+    if(!savedSettings.mods.length){ list.innerHTML='<div class="mod-item"><span>No mods added yet.</span></div>'; return; }
+    savedSettings.mods.forEach((mod,index)=>{
+        const row=document.createElement("div"); row.className="mod-item";
+        const name=document.createElement("span"); name.textContent=mod.name;
+        const toggle=document.createElement("input"); toggle.type="checkbox"; toggle.checked=mod.enabled!==false;
+        toggle.addEventListener("change",()=>{mod.enabled=toggle.checked;saveSettings();applyMods();});
+        const remove=document.createElement("button"); remove.className="danger-btn"; remove.textContent="Remove";
+        remove.addEventListener("click",()=>{savedSettings.mods.splice(index,1);saveSettings();applyMods();renderMods();});
+        row.append(name,toggle,remove); list.appendChild(row);
+    });
+}
+function applyMods(){
+    let style=document.getElementById("schooly-user-mods"); if(!style){style=document.createElement("style");style.id="schooly-user-mods";document.head.appendChild(style);}
+    style.textContent=savedSettings.mods.filter(m=>m.enabled!==false).map(m=>m.css).join("\n");
+}
+document.getElementById("addModButton").addEventListener("click",()=>{
+    const name=document.getElementById("modName").value.trim() || "Unnamed mod";
+    const css=document.getElementById("modCss").value.trim();
+    if(!css) return;
+    savedSettings.mods.push({name,css,enabled:true}); saveSettings(); applyMods(); renderMods();
+    document.getElementById("modName").value=""; document.getElementById("modCss").value="";
+});
+
+document.getElementById("resetSettingsButton").addEventListener("click",()=>{
+    if(!confirm("Reset all Schooly settings?")) return;
+    localStorage.removeItem(SETTINGS_KEY); location.reload();
+});
+
+window.addEventListener("mousemove",e=>{customCursor.style.left=e.clientX+"px";customCursor.style.top=e.clientY+"px";});
+
+// Movable settings window
+let dragging=false, dragOffsetX=0, dragOffsetY=0;
+settingsTitlebar.addEventListener("mousedown",e=>{
+    if(e.target.closest("button")) return;
+    const rect=settingsWindow.getBoundingClientRect(); dragging=true; dragOffsetX=e.clientX-rect.left; dragOffsetY=e.clientY-rect.top;
+    settingsWindow.style.transform="none"; settingsWindow.style.left=rect.left+"px"; settingsWindow.style.top=rect.top+"px";
+});
+window.addEventListener("mousemove",e=>{
+    if(!dragging) return;
+    const maxX=window.innerWidth-settingsWindow.offsetWidth, maxY=window.innerHeight-settingsWindow.offsetHeight;
+    settingsWindow.style.left=Math.max(0,Math.min(maxX,e.clientX-dragOffsetX))+"px";
+    settingsWindow.style.top=Math.max(0,Math.min(maxY,e.clientY-dragOffsetY))+"px";
+});
+window.addEventListener("mouseup",()=>dragging=false);
+
+applyTheme(savedSettings.theme); applyCursor(savedSettings.cursor); applyBehavior(); applyMods();
+
+/* =========================================================
+   PAGE SYSTEM
+========================================================= */
+
+const tabs =
+    document.querySelectorAll(
+        ".browser-tab"
+    );
+
+const pages =
+    document.querySelectorAll(
+        ".page"
+    );
+
+let currentPage = savedSettings.rememberPage ? (localStorage.getItem("schoolyLastPage") || "home") : "home";
+
+function openPage(name){
+
+    pages.forEach(page => {
+
+        page.classList.remove(
+            "active"
+        );
+
+    });
+
+    const page =
+        document.getElementById(
+            name + "Page"
+        );
+
+    if(page){
+
+        page.classList.add(
+            "active"
+        );
+
+    }
+
+tabs.forEach(tab => {
+
+        tab.classList.toggle(
+            "active",
+            tab.dataset.page === name
+        );
+
+    });
+
+    currentPage = name;
+    if(savedSettings.rememberPage) localStorage.setItem("schoolyLastPage", name);
+
+}
+
+tabs.forEach(tab => {
+
+    tab.addEventListener(
+        "click",
+        event => {
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            openPage(
+                tab.dataset.page
+            );
+
+        }
+    );
+
+});
+
+document
+.querySelectorAll(".school-button")
+.forEach(button => {
+
+    button.addEventListener(
+        "click",
+        () => {
+
+            openPage(
+                button.dataset.open
+            );
+
+        }
+    );
+
+});
+
+document
+.querySelectorAll(".tab-close")
+.forEach(closeButton => {
+
+    closeButton.addEventListener(
+        "click",
+        event => {
+
+            event.preventDefault();
+            event.stopPropagation();
+
+        }
+    );
+
+});
+
+document
+.getElementById("newTabButton")
+.addEventListener(
+    "click",
+    () => {
+
+        openPage("home");
+
+    }
+);
+
+document
+.getElementById("backButton")
+.addEventListener(
+    "click",
+    () => {
+
+        openPage("home");
+
+    }
+);
+
+document
+.getElementById("forwardButton")
+.addEventListener(
+    "click",
+    () => {
+
+        openPage("home");
+
+    }
+);
+
+document
+.getElementById("refreshButton")
+.addEventListener(
+    "click",
+    () => {
+
+        const activeFrame =
+            document.querySelector(
+                ".page.active iframe"
+            );
+
+        if(activeFrame){
+
+            activeFrame.src =
+                activeFrame.src;
+
+        }
+
+        if(currentPage === "music"){
+
+            if(
+                musicSearch.value.trim()
+            ){
+
+                searchMusic(
+                    musicSearch.value.trim()
+                );
+
+            }
+
+        }
+
+        if(currentPage === "games"){
+
+            loadSchoolyGames();
+
+        }
+
+    }
+);
+
+/* =========================================================
+   SCHOOLY GAMES SYSTEM
+========================================================= */
+
+const gamesGrid =
+    document.getElementById("gamesGrid");
+
+const gamesMessage =
+    document.getElementById("gamesMessage");
+
+const gamesSearch =
+    document.getElementById("gamesSearch");
+
+const gamesSearchClear =
+    document.getElementById("gamesSearchClear");
+
+const gamesRefresh =
+    document.getElementById("gamesRefresh");
+
+const gamesCategories =
+    document.getElementById("gamesCategories");
+
+const gamesCount =
+    document.getElementById("gamesCount");
+
+const gameModal =
+    document.getElementById("gameModal");
+
+const gameFrame =
+    document.getElementById("gameFrame");
+
+const gameModalTitle =
+    document.getElementById("gameModalTitle");
+
+const gameClose =
+    document.getElementById("gameClose");
+
+const gameNewTab =
+    document.getElementById("gameNewTab");
+
+const gameFullscreen =
+    document.getElementById("gameFullscreen");
+
+
+/* =========================================================
+   GAME LIST
+========================================================= */
+
+const SCHOOLY_GAMES = [
+
+{
+        name:"A Dance of Fire and Ice",
+        file:"clADOFAI.html",
+        icon:"https://www.vpesports.com/wp-content/uploads/2025/06/A-Dance-of-Fire-and-Ice.png",
+        description:"A rhythm game where you control two orbiting planets."
+    },
+
+{
+        name:"A Dark Room",
+        file:"clADarkRoom.html",
+        icon:"https://images.nintendolife.com/9341c0c0e4e76/1280x720.jpg",
+        description:"A mysterious adventure and survival game."
+    },
+
+{
+        name:"A Date with Death",
+        file:"cladatewithdeath.html",
+        icon:"https://cdn.donmai.us/original/be/73/__casper_a_date_with_death_drawn_by_sketchlyn__be73773b150a29b05ae8b720eeaa67a1.jpg",
+        description:"A visual novel adventure."
+    },
+
+{
+        name:"A Day in the Office",
+        file:"cladayintheoffice.html",
+        icon:"https://i.ytimg.com/vi/tTVlrJMKN1I/maxresdefault.jpg",
+        description:"A short office adventure game."
+    },
+
+{
+        name:"AdventNEON",
+        file:"cladventneon.html",
+        icon:"https://images.crazygames.com/adventneon/20210202084011/adventneon-cover?auto=format%2Ccompress&q=45&cs=strip&ch=DPR&w=1200&h=630&fit=crop",
+        description:"A fast-paced neon action platformer."
+    },
+
+{
+        name:"AdVenture Capitalist",
+        file:"clAdventureCapatalist.html",
+        icon:"https://tse1.mm.bing.net/th/id/OIP.Tlm6Ocq4B_KyfE4uWkssUQHaFj?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",
+        description:"Build your own business empire."
+    },
+
+{
+        name:"Agario.io Lite",
+        file:"clagariolite.html",
+        icon:"https://www.zuzu.games/upload/fb/agario-1558081786.jpg",
+        description:"Grow bigger by consuming other cells."
+    },
+
+{
+        name:"Ages of Conflict",
+        file:"clagesofconflict.html",
+        icon:"https://tse1.mm.bing.net/th/id/OIP.TerABYicfzjGuvrnhHrttQHaEP?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",
+        description:"Watch civilizations rise and fight for control."
+    },
+
+{
+        name:"Ahoy Survival",
+        file:"clahoysurvival.html",
+        icon:"https://th.bing.com/th/id/OIP.wTY8W_LmBRVwt19ynY2sEgHaF7?r=0&o=7rm=3&rs=1&pid=ImgDetMain&o=7&rm=3",
+        description:"Survive and explore on the open sea."
+    },
+
+{
+        name:"Airline Tycoon Idle",
+        file:"clairlinetycoonidle.html",
+        icon:"https://static.seeles.ai/media/prod/game/cover/5016_f6dc3576-c687-46a4-a895-3515792aca91.jpg",
+        description:"Build and manage your own airline."
+    },
+
+{
+        name:"Alien Sky Invasion",
+        file:"clalienskyinvasion.html",
+        icon:"https://tse3.mm.bing.net/th/id/OIP.itsHtVIiearR-hOs4zQRNwHaD4?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",
+        description:"Defend against an alien invasion."
+    },
+
+{
+        name:"Allocation",
+        file:"clallocation.html",
+        icon:"https://tse2.mm.bing.net/th/id/OIP.o2aCaSOIh3FObDY0bKeZjwAAAA?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",
+        description:"A strategic resource management game."
+    },
+
+{
+        name:"Amidst the Sky",
+        file:"clamidstthesky.html",
+        icon:"https://th.bing.com/th/id/OIP.H0MBmYpE-bZ9DVNw6W-EWgHaEM?r=0&o=7rm=3&rs=1&pid=ImgDetMain&o=7&rm=3",
+        description:"Explore a mysterious world in the sky."
+    },
+
+{
+        name:"Among Us",
+        file:"clamongus.html",
+        icon:"https://th.bing.com/th/id/R.3fac17e8bb45d81ec9b2c24655758075?rik=oVqnWYa2j4vGLQ&pid=ImgRaw&r=0",
+        description:"Find the impostor before it's too late."
+    },
+
+{
+        name:"Amorphous",
+        file:"clamorphous.html",
+        icon:"https://tse2.mm.bing.net/th/id/OIP.y1iUIqlxF8-HjcjwFR5m9AAAAA?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",
+        description:"Fight waves of strange creatures."
+    },
+
+{
+        name:"Ancient Sins",
+        file:"clancientsins.html",
+        icon:"https://tse3.mm.bing.net/th/id/OIP.WlUmPf2Q2QyHmcgqUU0HpwHaEK?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",
+        description:"Uncover the secrets of an ancient world."
+    },
+
+{
+        name:"Angry Bird",
+        file:"clangrybirds.html",
+        icon:"https://tse2.mm.bing.net/th/id/OIP.wQc4X7OZ67-hdv9iDDgDRAHaHa?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",
+        description:"Launch birds and destroy the pigs."
+    },
+
+{
+        name:"Angry Birds 2",
+        file:"clangrybirds2.html",
+        icon:"https://www.angrybirds.com/wp-content/uploads/2022/08/AB2_202208_1920x1080_KeyArt_KeyArt_Flying.jpg",
+        description:"The next generation of Angry Birds."
+    },
+
+{
+        name:"Angry Birds Online",
+        file:"clangrybirdsonline.html",
+        icon:"https://tse3.mm.bing.net/th/id/OIP.rl5ChtUuagSOm0u7ukY1-gHaEK?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",
+        description:"Play Angry Birds directly in your browser."
+    },
+
+{
+        name:"Angry Birds Showdown",
+        file:"clangrybirdsshowdown.html",
+        icon:"https://th.bing.com/th/id/OIP.8erzNv36_nOrvk-v23gHPQAAAA?r=0&o=7rm=3&rs=1&pid=ImgDetMain&o=7&rm=3",
+        description:"A competitive Angry Birds experience."
+    },
+
+{
+        name:"Angry Birds Slingshot Frenzy",
+        file:"clangrybirdsslingshotfrenzy.html",
+        icon:"https://th.bing.com/th/id/OIP.P1OfE8F6KOve0DMbze7mgwHaEK?r=0&o=7rm=3&rs=1&pid=ImgDetMain&o=7&rm=3",
+        description:"Classic slingshot action with Angry Birds."
+    },
+
+{
+        name:"Animal Crossing",
+        file:"clanimalcrossing.html",
+        icon:"https://th.bing.com/th/id/OIP.FtEJqCSjJ24eDF7aarQqtwHaEK?r=0&o=7rm=3&rs=1&pid=ImgDetMain&o=7&rm=3",
+        description:"Build and explore your own island."
+    },
+
+{
+        name:"Ant Art Tycoon",
+        file:"clantarttycoon.html",
+        icon:"https://tse4.mm.bing.net/th/id/OIP.ZD8zAIQhvwMDjaASll8bjAHaEP?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",
+        description:"Create art and become an ant art tycoon."
+    },
+
+{
+        name:"Antimatter Dimensions",
+        file:"clantimatterdimensions.html",
+        icon:"https://th.bing.com/th/id/OIP.B3GTR6trKXuJDHCsbHmvSQHaEP?r=0&o=7rm=3&rs=1&pid=ImgDetMain",
+        description:"A massive incremental space adventure."
+    },
+
+{
+        name:"Apes vs. Helium",
+        file:"clapesvshelium.html",
+        icon:"https://sxhodsrixg8meuri.public.blob.vercel-storage.com/fandom-lore/characters/apes-vs-helium/fandom-hero-39a2819e3c03.png",
+        description:"Apes battle against helium-powered enemies."
+    },
+
+{
+        name:"Aquapark.io",
+        file:"claquaparkio.html",
+        icon:"https://th.bing.com/th/id/OIP.nYXbzPJkc0yDPqUmGASX9wHaEK?r=0&o=7rm=3&rs=1&pid=ImgDetMain&o=7&rm=3",
+        description:"Race down giant water slides."
+    },
+
+{
+        name:"Backroom",
+        file:"clbackrooms.html",
+        icon:"https://img.youtube.com/vi/_HrkenULKNo/0.jpg",
+        description:"Explore the eerie Backrooms and survive the unknown."
+    },
+
+{
+        name:"Backrooms 2D",
+        file:"clbackrooms2D.html",
+        icon:"https://img.itch.zone/aW1nLzk3MzM3MTgucG5n/original/ISpsBE.png",
+        description:"Explore the Backrooms in a 2D adventure."
+    },
+
+{
+        name:"Bad Parenting",
+        file:"clbadparenting.html",
+        icon:"https://img.itch.zone/aW1nLzE3ODQ0MDkxLnBuZw==/original/LyytQO.png",
+        description:"A mysterious horror game about a troubled family."
+    },
+
+{
+        name:"Bad Piggies",
+        file:"clbadpiggieslatest.html",
+        icon:"https://tse4.mm.bing.net/th/id/OIP.Gghpm5TvUzCXO_RCsmAtoAHaEK?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",
+        description:"Build strange machines and help the pigs."
+    },
+
+{
+        name:"Baldi's Basic Fun New School",
+        file:"clbaldisfunnewschoolultimate.html",
+        icon:"https://tse2.mm.bing.net/th/id/OIP.RqM00Xhq_6s2qvMIQfCiYwHaF3?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",
+        description:"A fun new-school adventure with Baldi."
+    },
+
+{
+        name:"Baldi's Basics",
+        file:"clbaldisbasics.html",
+        icon:"https://th.bing.com/th/id/OIP.mVKO5R9DdbIGnXtwrgzHVwHaHa?r=0&o=7rm=3&rs=1&pid=ImgDetMain&o=7&rm=3",
+        description:"Escape school while learning the basics from Baldi."
+    },
+
+{
+        name:"Baldi's Basics Decompile",
+        file:"clbaldidecomp.html",
+        icon:"https://tse1.mm.bing.net/th/id/OIP.7kqCV_Xf9wLASMXQlLAewwHaFj?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",
+        description:"An ultra decompile of Baldi's Basics."
+    },
+
+{
+        name:"Banana Simulator",
+        file:"clbananasimulator.html",
+        icon:"https://tse3.mm.bing.net/th/id/OIP.OPIx39vrCEbv7wJjpVr9TwAAAA?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",
+        description:"Click bananas, earn money, and hire workers."
+    },
+
+{
+        name:"Bank Robbery 1",
+        file:"clbankrobbery1.html",
+        icon:"https://th.bing.com/th/id/OIP.6SxaUc0KdNG_86PJNLuP8QHaD4?r=0&o=7rm=3&rs=1&pid=ImgDetMain&o=7&rm=3",
+        description:"Plan and survive a bank robbery."
+    },
+
+{
+        name:"Bank Robbery 2",
+        file:"clbankrobbery2.html",
+        icon:"https://th.bing.com/th/id/OIP.GcLpAWMPGp18xTUb1w1HsgHaEO?r=0&o=7rm=3&rs=1&pid=ImgDetMain&o=7&rm=3",
+        description:"Take on another bank robbery challenge."
+    },
+
+{
+        name:"Bart Blast",
+        file:"clbartblast.html",
+        icon:"https://tse3.mm.bing.net/th/id/OIP.li81_NHsUuha5arRqojgRgHaEI?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",
+        description:"Blast through a fast-paced Bart adventure."
+    },
+
+{
+        name:"Baseball Bros",
+        file:"clbaseballbros.html",
+        icon:"https://th.bing.com/th/id/OIP.dM4QW9nlzSorgZKYPx-kCgHaES?r=0&o=7rm=3&rs=1&pid=ImgDetMain&o=7&rm=3",
+        description:"Fast-paced baseball action."
+    },
+
+{
+        name:"Batter Up",
+        file:"clbatterup.html",
+        icon:"https://tse3.mm.bing.net/th/id/OIP.kaWXhdP8AwxscoeiZa7AUAHaEK?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",
+        description:"Hit the ball and take on the challenge."
+    },
+
+{
+        name:"Battle Karts",
+        file:"clbattlekarts.html",
+        icon:"https://th.bing.com/th/id/OIP.DITHFfsskw0fL6iSfxkrBQAAAA?r=0&o=7rm=3&rs=1&pid=ImgDetMain&o=7&rm=3",
+        description:"Race and battle in explosive kart matches."
+    },
+
+{
+        name:"Beach Boxing Sim",
+        file:"clbeachboxingsim.html",
+        icon:"https://th.bing.com/th/id/OIP.itlUEM_6tJW3Hx0cfho8UwHaD0?r=0&o=7rm=3&rs=1&pid=ImgDetMain&o=7&rm=3",
+        description:"Train and fight in a beach boxing simulator."
+    },
+
+{
+        name:"Bergentruck 201X",
+        file:"clbergentruck201x.html",
+        icon:"https://tse2.mm.bing.net/th/id/OIP.Yg7NoMYS--WGXPZ8dWhWyQAAAA?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",
+        description:"Drive through a surreal world in Bergentruck 201X."
+    },
+
+{
+        name:"Big Flappy",
+        file:"clbigflappytowertinysquare.html",
+        icon:"https://th.bing.com/th/id/R.6b8f6342a68060ca2c3328a39445031f?rik=LOubXJzv7xBsMQ&riu=http%3a%2f%2fwww.coolmathgames.com%2fsites%2fdefault%2ffiles%2fBigFlappyTowerTinySquare_OG-logo.jpg&ehk=czIOIwlQfN7Ll49lLiMh2YRz%2fBFJCcaV41rf5TqBEvI%3d&risl=&pid=ImgRaw&r=0",
+        description:"Climb the Big Tower to rescue your pineapple."
+    },
+
+{
+        name:"Bio Evil 4",
+        file:"clbioevil4.html",
+        icon:"https://th.bing.com/th/id/OIP.kd5SCSVahO3Gkk7fq_nxvQHaEK?r=0&o=7rm=3&rs=1&pid=ImgDetMain&o=7&rm=3",
+        description:"A challenging platform shooter."
+    },
+
+{
+        name:"Block Blast",
+        file:"clblockblast.html",
+        icon:"https://tse2.mm.bing.net/th/id/OIP.s5T-DLlxOevheC1bcZ4s5wHaEK?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",
+        description:"Clear blocks and chase a high score."
+    },
+
+{
+        name:"Geometry Dash",
+        file:"clwebdashers.html",
+        icon:"https://i.ytimg.com/vi/oGiLDRhPkuA/sddefault.jpg",
+        description:"A fast-paced rhythm platformer with challenging levels."
+    }
+
+];
+
+
+/* =========================================================
+   GAME STATE
+========================================================= */
+
+let schoolyGames =
+    [...SCHOOLY_GAMES];
+
+let filteredSchoolyGames =
+    [...SCHOOLY_GAMES];
+
+let selectedGameCategory =
+    "All Games";
+
+let currentSchoolyGame =
+    null;
+
+
+/* =========================================================
+   RENDER CATEGORIES
+========================================================= */
+
+function renderSchoolyCategories(){
+
+    gamesCategories.innerHTML = "";
+
+    const categories = [
+        "All Games",
+        ...[...new Set(
+            schoolyGames
+                .map(game => game.name.trim().charAt(0).toUpperCase())
+                .filter(Boolean)
+        )].sort((a,b) => a.localeCompare(b))
+    ];
+
+    categories.forEach(category => {
+
+        const button =
+            document.createElement("button");
+
+        button.className =
+            "games-category";
+
+        if(
+            category ===
+            selectedGameCategory
+        ){
+
+            button.classList.add(
+                "active"
+            );
+
+        }
+
+        button.textContent =
+            category;
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                selectedGameCategory =
+                    category;
+
+                renderSchoolyCategories();
+                filterSchoolyGames();
+
+            }
+        );
+
+        gamesCategories.appendChild(
+            button
+        );
+
+    });
+
+}
+
+
+/* =========================================================
+   RENDER GAMES
+========================================================= */
+
+function renderSchoolyGames(){
+
+    gamesGrid.innerHTML = "";
+
+    if(
+        !filteredSchoolyGames.length
+    ){
+
+        gamesMessage.style.display =
+            "block";
+
+        gamesMessage.textContent =
+            "No games found.";
+
+        gamesCount.textContent =
+            "0 games";
+
+        return;
+
+    }
+
+    gamesMessage.style.display =
+        "none";
+
+    gamesCount.textContent =
+        `${filteredSchoolyGames.length} games`;
+
+    filteredSchoolyGames.forEach(
+        game => {
+
+            const card =
+                document.createElement(
+                    "div"
+                );
+
+            card.className =
+                "game-card";
+
+            const imageWrap =
+                document.createElement(
+                    "div"
+                );
+
+            imageWrap.className =
+                "game-image-wrap";
+
+            const fallback =
+                document.createElement(
+                    "div"
+                );
+
+            fallback.className =
+                "game-image-fallback";
+
+            fallback.textContent =
+                game.name
+                .charAt(0)
+                .toUpperCase();
+
+            imageWrap.appendChild(
+                fallback
+            );
+
+            if(game.icon){
+
+                const image =
+                    document.createElement(
+                        "img"
+                    );
+
+                image.className =
+                    "game-image";
+
+                image.src =
+                    game.icon;
+
+                image.alt =
+                    game.name;
+
+                image.loading =
+                    "lazy";
+
+                image.addEventListener(
+                    "load",
+                    () => {
+
+                        fallback.style.display =
+                            "none";
+
+                    }
+                );
+
+                image.addEventListener(
+                    "error",
+                    () => {
+
+                        image.remove();
+
+                    }
+                );
+
+                imageWrap.appendChild(
+                    image
+                );
+
+            }
+
+            const info =
+                document.createElement(
+                    "div"
+                );
+
+            info.className =
+                "game-info";
+
+            const name =
+                document.createElement(
+                    "div"
+                );
+
+            name.className =
+                "game-name";
+
+            name.textContent =
+                game.name;
+
+            const description =
+                document.createElement(
+                    "div"
+                );
+
+            description.className =
+                "game-description";
+
+            description.textContent =
+                game.description;
+
+            const category =
+                document.createElement(
+                    "div"
+                );
+
+            category.className =
+                "game-category";
+
+            category.textContent =
+                "A";
+
+            info.appendChild(
+                name
+            );
+
+            info.appendChild(
+                description
+            );
+
+            info.appendChild(
+                category
+            );
+
+            card.appendChild(
+                imageWrap
+            );
+
+            card.appendChild(
+                info
+            );
+
+            card.addEventListener(
+                "click",
+                () => {
+
+                    openSchoolyGame(
+                        game
+                    );
+
+                }
+            );
+
+            gamesGrid.appendChild(
+                card
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   SEARCH / FILTER
+========================================================= */
+
+function filterSchoolyGames(){
+
+    const query =
+        gamesSearch.value
+        .trim()
+        .toLowerCase();
+
+    filteredSchoolyGames =
+        schoolyGames.filter(
+            game => {
+
+                const categoryMatch =
+                    selectedGameCategory ===
+                    "All Games" ||
+                    game.name.trim().charAt(0).toUpperCase() ===
+                    selectedGameCategory;
+
+                if(!categoryMatch){
+                    return false;
+                }
+
+                if(!query){
+                    return true;
+                }
+
+                return (
+                    game.name
+                    .toLowerCase()
+                    .includes(query)
+                    ||
+                    game.description
+                    .toLowerCase()
+                    .includes(query)
+                );
+
+            }
+        );
+
+    renderSchoolyGames();
+
+}
+
+
+/* =========================================================
+   LOAD GAMES
+========================================================= */
+
+function loadSchoolyGames(){
+
+    schoolyGames =
+        [...SCHOOLY_GAMES];
+
+    filteredSchoolyGames =
+        [...SCHOOLY_GAMES];
+
+    selectedGameCategory =
+        "All Games";
+
+    renderSchoolyCategories();
+    filterSchoolyGames();
+
+}
+
+
+/* =========================================================
+   OPEN GAME
+========================================================= */
+
+function openSchoolyGame(game){
+
+    if(
+        !game ||
+        !game.file
+    ){
+
+        return;
+
+    }
+
+    if(savedSettings.gameConfirm && !confirm("Open " + game.name + "?")){
+        return;
+    }
+
+    currentSchoolyGame =
+        game;
+
+    gameModalTitle.textContent =
+        game.name;
+
+    /*
+       The game HTML files are expected
+       to be beside index.html.
+    */
+
+    gameFrame.src =
+        game.file;
+
+    gameModal.classList.add(
+        "active"
+    );
+
+    gameModal.setAttribute(
+        "aria-hidden",
+        "false"
+    );
+
+    document.body.style.overflow =
+        "hidden";
+
+}
+
+
+/* =========================================================
+   CLOSE GAME
+========================================================= */
+
+function closeSchoolyGame(){
+
+    gameModal.classList.remove(
+        "active"
+    );
+
+    gameModal.setAttribute(
+        "aria-hidden",
+        "true"
+    );
+
+    gameFrame.src =
+        "about:blank";
+
+    currentSchoolyGame =
+        null;
+
+}
+
+
+/* =========================================================
+   GAME BUTTONS
+========================================================= */
+
+gameClose.addEventListener(
+    "click",
+    closeSchoolyGame
+);
+
+gameModal.addEventListener(
+    "click",
+    event => {
+
+        if(
+            event.target ===
+            gameModal
+        ){
+
+            closeSchoolyGame();
+
+        }
+
+    }
+);
+
+gameNewTab.addEventListener(
+    "click",
+    () => {
+
+        if(
+            currentSchoolyGame &&
+            currentSchoolyGame.file
+        ){
+
+            window.open(
+                currentSchoolyGame.file,
+                "_blank"
+            );
+
+        }
+
+    }
+);
+
+gameFullscreen.addEventListener(
+    "click",
+    async () => {
+
+        try{
+
+            if(
+                document.fullscreenElement
+            ){
+
+                await document.exitFullscreen();
+
+                return;
+
+            }
+
+            if(
+                gameFrame.requestFullscreen
+            ){
+
+                await gameFrame.requestFullscreen();
+
+            }
+
+        }catch(error){
+
+            console.warn(
+                "Fullscreen unavailable:",
+                error
+            );
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   ESCAPE KEY
+========================================================= */
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if(
+            event.key === "Escape" &&
+            gameModal.classList.contains(
+                "active"
+            )
+        ){
+
+            closeSchoolyGame();
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   SEARCH EVENTS
+========================================================= */
+
+gamesSearch.addEventListener(
+    "input",
+    filterSchoolyGames
+);
+
+gamesSearchClear.addEventListener(
+    "click",
+    () => {
+
+        gamesSearch.value = "";
+
+        selectedGameCategory =
+            "All Games";
+
+        renderSchoolyCategories();
+        filterSchoolyGames();
+
+        gamesSearch.focus();
+
+    }
+);
+
+gamesRefresh.addEventListener(
+    "click",
+    loadSchoolyGames
+);
+
+
+/* =========================================================
+   START GAMES
+========================================================= */
+
+loadSchoolyGames();
+/* =========================================================
+   JAMENDO MUSIC SYSTEM
+========================================================= */
+
+const JAMENDO_CLIENT_ID =
+    "0289890f";
+
+const JAMENDO_API =
+    "https://api.jamendo.com/v3.0/tracks/";
+
+const audioPlayer =
+    document.getElementById(
+        "audioPlayer"
+    );
+
+const musicSearch =
+    document.getElementById(
+        "musicSearch"
+    );
+
+const searchButton =
+    document.getElementById(
+        "searchButton"
+    );
+
+const musicStatus =
+    document.getElementById(
+        "musicStatus"
+    );
+
+const trackList =
+    document.getElementById(
+        "trackList"
+    );
+
+const resultCount =
+    document.getElementById(
+        "resultCount"
+    );
+
+const queueList =
+    document.getElementById(
+        "queueList"
+    );
+
+const nowCover =
+    document.getElementById(
+        "nowCover"
+    );
+
+const nowTitle =
+    document.getElementById(
+        "nowTitle"
+    );
+
+const nowArtist =
+    document.getElementById(
+        "nowArtist"
+    );
+
+const playButton =
+    document.getElementById(
+        "playButton"
+    );
+
+const previousButton =
+    document.getElementById(
+        "previousButton"
+    );
+
+const nextButton =
+    document.getElementById(
+        "nextButton"
+    );
+
+const playIcon =
+    document.getElementById(
+        "playIcon"
+    );
+
+const progressBar =
+    document.getElementById(
+        "progressBar"
+    );
+
+const progressFill =
+    document.getElementById(
+        "progressFill"
+    );
+
+const progressDot =
+    document.getElementById(
+        "progressDot"
+    );
+
+const currentTime =
+    document.getElementById(
+        "currentTime"
+    );
+
+const totalTime =
+    document.getElementById(
+        "totalTime"
+    );
+
+const volumeControl =
+    document.getElementById(
+        "volumeControl"
+    );
+
+const clearQueue =
+    document.getElementById(
+        "clearQueue"
+    );
+
+const likeButton =
+    document.getElementById(
+        "likeButton"
+    );
+
+let searchResults = [];
+let queue = [];
+let currentTrackIndex = -1;
+let isSearching = false;
+
+function formatTime(seconds){
+
+    if(!Number.isFinite(seconds)){
+        return "0:00";
+    }
+
+    seconds =
+        Math.max(
+            0,
+            Math.floor(seconds)
+        );
+
+    const minutes =
+        Math.floor(
+            seconds / 60
+        );
+
+    const remaining =
+        seconds % 60;
+
+    return (
+        minutes +
+        ":" +
+        String(
+            remaining
+        ).padStart(
+            2,
+            "0"
+        )
+    );
+
+}
+
+async function searchMusic(query){
+
+    if(
+        !query ||
+        isSearching
+    ){
+
+        return;
+
+    }
+
+    isSearching = true;
+
+    musicStatus.style.display =
+        "block";
+
+    trackList.innerHTML =
+        "";
+
+    musicStatus.textContent =
+        "Searching Jamendo...";
+
+    resultCount.textContent =
+        "Searching";
+
+    try{
+
+        const params =
+            new URLSearchParams({
+
+                client_id:
+                    JAMENDO_CLIENT_ID,
+
+                format:
+                    "json",
+
+                limit:
+                    "30",
+
+                offset:
+                    "0",
+
+                search:
+                    query,
+
+                include:
+                    "musicinfo",
+
+                imagesize:
+                    "200",
+
+                audioformat:
+                    "mp32",
+
+                order:
+                    "relevance"
+
+            });
+
+        const response =
+            await fetch(
+                JAMENDO_API +
+                "?" +
+                params.toString()
+            );
+
+        if(!response.ok){
+
+            throw new Error(
+                "Jamendo returned " +
+                response.status
+            );
+
+        }
+
+        const data =
+            await response.json();
+
+        if(
+            !data.results ||
+            !data.results.length
+        ){
+
+            searchResults = [];
+
+            resultCount.textContent =
+                "0 results";
+
+            musicStatus.textContent =
+                "No music found. Try another search.";
+
+            isSearching = false;
+
+            return;
+
+        }
+
+        searchResults =
+            data.results;
+
+        resultCount.textContent =
+            `${searchResults.length} results`;
+
+        musicStatus.style.display =
+            "none";
+
+        renderResults();
+
+    }catch(error){
+
+        console.error(
+            "Jamendo search error:",
+            error
+        );
+
+        resultCount.textContent =
+            "Error";
+
+        musicStatus.textContent =
+            "Couldn't connect to Jamendo. Check your Client ID or internet connection.";
+
+        musicStatus.style.display =
+            "block";
+
+    }
+
+    isSearching = false;
+
+}
+
+function renderResults(){
+
+    trackList.innerHTML =
+        "";
+
+    searchResults.forEach(
+        (track,index) => {
+
+            const element =
+                document.createElement(
+                    "div"
+                );
+
+            element.className =
+                "track";
+
+            element.dataset.index =
+                index;
+
+            const image =
+                track.image ||
+                track.album_image ||
+                "";
+
+            element.innerHTML = `
+
+                <img
+                    class="track-cover"
+                    src="${escapeHtml(image)}"
+                    alt=""
+                    loading="lazy"
+                >
+
+                <div class="track-info">
+
+                    <div class="track-name">
+                        ${escapeHtml(
+                            track.name ||
+                            "Unknown track"
+                        )}
+                    </div>
+
+                    <div class="track-artist">
+                        ${escapeHtml(
+                            track.artist_name ||
+                            "Unknown artist"
+                        )}
+                    </div>
+
+                    <div class="track-album">
+                        ${escapeHtml(
+                            track.album_name ||
+                            "Single"
+                        )}
+                    </div>
+
+                </div>
+
+                <div class="track-duration">
+                    ${formatTime(
+                        Number(track.duration)
+                    )}
+                </div>
+
+                <div class="track-play">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M8 5l11 7-11 7V5z"/>
+                    </svg>
+                </div>
+            `;
+
+            element.addEventListener(
+                "click",
+                () => {
+
+                    playTrack(
+                        track
+                    );
+
+                }
+            );
+
+            trackList.appendChild(
+                element
+            );
+
+        }
+    );
+
+}
+
+function escapeHtml(value){
+
+    return String(
+        value ?? ""
+    )
+    .replace(
+        /&/g,
+        "&amp;"
+    )
+    .replace(
+        /</g,
+        "&lt;"
+    )
+    .replace(
+        />/g,
+        "&gt;"
+    )
+    .replace(
+        /"/g,
+        "&quot;"
+    )
+    .replace(
+        /'/g,
+        "&#039;"
+    );
+
+}
+
+function playTrack(track){
+
+    if(!track){
+        return;
+    }
+
+    const existingIndex =
+        queue.findIndex(
+            item =>
+                String(item.id) ===
+                String(track.id)
+        );
+
+    if(existingIndex === -1){
+        queue.push(track);
+    }
+
+    currentTrackIndex =
+        queue.findIndex(
+            item =>
+                String(item.id) ===
+                String(track.id)
+        );
+
+    updateQueue();
+
+    const audioUrl =
+        track.audio;
+
+    if(!audioUrl){
+
+        musicStatus.style.display =
+            "block";
+
+        musicStatus.textContent =
+            "This track doesn't have a playable audio stream.";
+
+        return;
+
+    }
+
+    audioPlayer.src =
+        audioUrl;
+
+    audioPlayer.load();
+
+    nowTitle.textContent =
+        track.name ||
+        "Unknown track";
+
+    nowArtist.textContent =
+        track.artist_name ||
+        "Unknown artist";
+
+    nowCover.src =
+        track.image ||
+        track.album_image ||
+        "";
+
+    nowCover.onerror =
+        () => {
+
+            nowCover.removeAttribute(
+                "src"
+            );
+
+        };
+
+    audioPlayer.play()
+    .then(
+        () => {
+
+            setPlayingIcon(
+                true
+            );
+
+        }
+    )
+    .catch(
+        error => {
+
+            console.error(
+                "Playback error:",
+                error
+            );
+
+            setPlayingIcon(
+                false
+            );
+
+            musicStatus.style.display =
+                "block";
+
+            musicStatus.textContent =
+                "Press play to start the track.";
+
+        }
+    );
+
+    highlightCurrentTrack();
+
+}
+
+function setPlayingIcon(
+    playing
+){
+
+    if(playing){
+
+        playIcon.innerHTML =
+            `
+                <path d="M8 6v12"/>
+                <path d="M16 6v12"/>
+            `;
+
+    }else{
+
+        playIcon.innerHTML =
+            `
+                <path d="M8 5l11 7-11 7V5z"/>
+            `;
+
+    }
+
+}
+
+playButton.addEventListener(
+    "click",
+    () => {
+
+        if(!audioPlayer.src){
+
+            if(queue.length){
+
+                playTrack(
+                    queue[
+                        currentTrackIndex >= 0
+                            ? currentTrackIndex
+                            : 0
+                    ]
+                );
+
+            }
+
+            return;
+
+        }
+
+        if(audioPlayer.paused){
+
+            audioPlayer.play()
+            .then(
+                () => {
+
+                    setPlayingIcon(
+                        true
+                    );
+
+                }
+            )
+            .catch(
+                () => {}
+            );
+
+        }else{
+
+            audioPlayer.pause();
+
+            setPlayingIcon(
+                false
+            );
+
+        }
+
+    }
+);
+
+nextButton.addEventListener(
+    "click",
+    () => {
+
+        if(!queue.length){
+            return;
+        }
+
+        if(
+            currentTrackIndex <
+            queue.length - 1
+        ){
+
+            currentTrackIndex++;
+
+        }else{
+
+            currentTrackIndex = 0;
+
+        }
+
+        playTrack(
+            queue[
+                currentTrackIndex
+            ]
+        );
+
+    }
+);
+
+previousButton.addEventListener(
+    "click",
+    () => {
+
+        if(!queue.length){
+            return;
+        }
+
+        if(
+            audioPlayer.currentTime > 4
+        ){
+
+            audioPlayer.currentTime =
+                0;
+
+            return;
+
+        }
+
+        if(
+            currentTrackIndex > 0
+        ){
+
+            currentTrackIndex--;
+
+        }else{
+
+            currentTrackIndex =
+                queue.length - 1;
+
+        }
+
+        playTrack(
+            queue[
+                currentTrackIndex
+            ]
+        );
+
+    }
+);
+
+audioPlayer.addEventListener(
+    "ended",
+    () => {
+
+        if(!queue.length){
+
+            setPlayingIcon(
+                false
+            );
+
+            return;
+
+        }
+
+        if(
+            currentTrackIndex <
+            queue.length - 1
+        ){
+
+            currentTrackIndex++;
+
+        }else{
+
+            currentTrackIndex = 0;
+
+        }
+
+        playTrack(
+            queue[
+                currentTrackIndex
+            ]
+        );
+
+    }
+);
+
+audioPlayer.addEventListener(
+    "play",
+    () => {
+
+        setPlayingIcon(
+            true
+        );
+
+    }
+);
+
+audioPlayer.addEventListener(
+    "pause",
+    () => {
+
+        setPlayingIcon(
+            false
+        );
+
+    }
+);
+
+audioPlayer.addEventListener(
+    "loadedmetadata",
+    () => {
+
+        totalTime.textContent =
+            formatTime(
+                audioPlayer.duration
+            );
+
+    }
+);
+
+audioPlayer.addEventListener(
+    "timeupdate",
+    () => {
+
+        const duration =
+            audioPlayer.duration;
+
+        const current =
+            audioPlayer.currentTime;
+
+        if(
+            !Number.isFinite(duration) ||
+            duration <= 0
+        ){
+
+            return;
+
+        }
+
+        const percent =
+            (
+                current /
+                duration
+            ) * 100;
+
+        progressFill.style.width =
+            percent + "%";
+
+        progressDot.style.left =
+            percent + "%";
+
+        currentTime.textContent =
+            formatTime(
+                current
+            );
+
+    }
+);
+
+progressBar.addEventListener(
+    "click",
+    event => {
+
+        if(
+            !Number.isFinite(
+                audioPlayer.duration
+            )
+        ){
+
+            return;
+
+        }
+
+        const rect =
+            progressBar.getBoundingClientRect();
+
+        const percent =
+            (
+                event.clientX -
+                rect.left
+            ) /
+            rect.width;
+
+        audioPlayer.currentTime =
+            Math.max(
+                0,
+                Math.min(
+                    1,
+                    percent
+                )
+            ) *
+            audioPlayer.duration;
+
+    }
+);
+
+audioPlayer.volume =
+    Number(
+        volumeControl.value
+    );
+
+volumeControl.addEventListener(
+    "input",
+    () => {
+
+        audioPlayer.volume =
+            Number(
+                volumeControl.value
+            );
+
+    }
+);
+
+function updateQueue(){
+
+    queueList.innerHTML =
+        "";
+
+    if(!queue.length){
+
+        queueList.innerHTML =
+            `
+                <div class="queue-empty">
+                    Your queue is empty.
+                    <br><br>
+                    Click a song to start listening.
+                </div>
+            `;
+
+        return;
+
+    }
+
+    queue.forEach(
+        (track,index) => {
+
+            const item =
+                document.createElement(
+                    "div"
+                );
+
+            item.className =
+                "queue-item";
+
+            if(
+                index ===
+                currentTrackIndex
+            ){
+
+                item.classList.add(
+                    "active"
+                );
+
+            }
+
+            const image =
+                track.image ||
+                track.album_image ||
+                "";
+
+            item.innerHTML = `
+
+                <img
+                    class="queue-cover"
+                    src="${escapeHtml(image)}"
+                    alt=""
+                >
+
+                <div class="queue-info">
+
+                    <div class="queue-name">
+                        ${escapeHtml(
+                            track.name ||
+                            "Unknown track"
+                        )}
+                    </div>
+
+                    <div class="queue-artist">
+                        ${escapeHtml(
+                            track.artist_name ||
+                            "Unknown artist"
+                        )}
+                    </div>
+
+                </div>
+
+                <button
+                    class="queue-remove"
+                    title="Remove"
+                >
+
+                    <svg viewBox="0 0 24 24">
+                        <path d="M7 7l10 10M17 7L7 17"/>
+                    </svg>
+
+                </button>
+            `;
+
+            item.addEventListener(
+                "click",
+                event => {
+
+                    if(
+                        event.target.closest(
+                            ".queue-remove"
+                        )
+                    ){
+
+                        return;
+
+                    }
+
+                    currentTrackIndex =
+                        index;
+
+                    playTrack(
+                        queue[index]
+                    );
+
+                }
+            );
+
+            item
+            .querySelector(
+                ".queue-remove"
+            )
+            .addEventListener(
+                "click",
+                event => {
+
+                    event.stopPropagation();
+
+                    const removedIndex =
+                        index;
+
+                    queue.splice(
+                        removedIndex,
+                        1
+                    );
+
+                    if(
+                        removedIndex <
+                        currentTrackIndex
+                    ){
+
+                        currentTrackIndex--;
+
+                    }
+
+                    if(
+                        removedIndex ===
+                        currentTrackIndex
+                    ){
+
+                        if(queue.length){
+
+                            currentTrackIndex =
+                                Math.min(
+                                    currentTrackIndex,
+                                    queue.length - 1
+                                );
+
+                        }else{
+
+                            currentTrackIndex =
+                                -1;
+
+                        }
+
+                    }
+
+                    updateQueue();
+
+                    highlightCurrentTrack();
+
+                }
+            );
+
+            queueList.appendChild(
+                item
+            );
+
+        }
+    );
+
+}
+
+function highlightCurrentTrack(){
+
+    document
+    .querySelectorAll(
+        ".track"
+    )
+    .forEach(
+        element => {
+
+            const index =
+                Number(
+                    element.dataset.index
+                );
+
+            const track =
+                searchResults[index];
+
+            element.classList.toggle(
+                "playing",
+                Boolean(
+                    queue[
+                        currentTrackIndex
+                    ] &&
+                    track &&
+                    String(
+                        queue[
+                            currentTrackIndex
+                        ].id
+                    ) ===
+                    String(
+                        track.id
+                    )
+                )
+            );
+
+        }
+    );
+
+    updateQueue();
+
+}
+
+clearQueue.addEventListener(
+    "click",
+    () => {
+
+        queue = [];
+
+        currentTrackIndex =
+            -1;
+
+        audioPlayer.pause();
+
+        audioPlayer.removeAttribute(
+            "src"
+        );
+
+        audioPlayer.load();
+
+        nowTitle.textContent =
+            "Nothing playing";
+
+        nowArtist.textContent =
+            "Choose a song";
+
+        nowCover.removeAttribute(
+            "src"
+        );
+
+        progressFill.style.width =
+            "0%";
+
+        progressDot.style.left =
+            "0%";
+
+        currentTime.textContent =
+            "0:00";
+
+        totalTime.textContent =
+            "0:00";
+
+        setPlayingIcon(
+            false
+        );
+
+        updateQueue();
+
+        highlightCurrentTrack();
+
+    }
+);
+
+likeButton.addEventListener(
+    "click",
+    () => {
+
+        likeButton.classList.toggle(
+            "active"
+        );
+
+    }
+);
+
+searchButton.addEventListener(
+    "click",
+    () => {
+
+        searchMusic(
+            musicSearch.value.trim()
+        );
+
+    }
+);
+
+musicSearch.addEventListener(
+    "keydown",
+    event => {
+
+        if(
+            event.key === "Enter"
+        ){
+
+            searchMusic(
+                musicSearch.value.trim()
+            );
+
+        }
+
+    }
+);
+
+window.addEventListener(
+    "resize",
+    resize
+);
+
+resize();
+draw();
+
+</script>
+
+</body>
+</html>

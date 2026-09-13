@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Bergentruck 201X</title>
+<style>
+html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#000}
+#canvas{width:100%;height:100%;display:block;outline:none}
+</style>
+</head>
+<body>
+<canvas id="canvas">Your browser does not support HTML5 canvas.</canvas>
+<script src="https://cdn.jsdelivr.net/gh/bubblfan/web-port@main/bergentruck/main.js"></script>
+<script>
+const GODOT_CONFIG={args:[],canvasResizePolicy:2,executable:"BERGENTRUCK_201X",experimentalVK:false,focusCanvas:true,fileSizes:{"BERGENTRUCK_201X.pck":26639424,"BERGENTRUCK_201X.wasm":1625538},gdextensionLibs:["libgodot-box2d.web.template_release.wasm32.wasm"]};
+</script>
+<script src="https://cdn.jsdelivr.net/gh/bubblfan/web-port@main/bergentruck/BERGENTRUCK_201X.js"></script>
+<script>
+(function(){
+  if(typeof Engine !== "undefined"){
+    try{
+      const engine=new Engine(GODOT_CONFIG);
+      engine.startGame().catch(function(e){console.error(e);});
+    }catch(e){console.error(e);}
+  }
+})();
+</script>
+</body>
+</html>

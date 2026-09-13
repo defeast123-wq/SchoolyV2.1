@@ -1,28 +1,106 @@
-<base id="baseTag" href="https://web-dashers.github.io/">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Web Dashers needs this base URL for its files -->
+    <base href="https://web-dashers.github.io/">
+
+    <title>Geometry Dash</title>
+
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #000;
+        }
+
+        #loading {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            font-size: 18px;
+            z-index: 9999;
+        }
+    </style>
+</head>
+
+<body>
+
+<div id="loading">Loading Geometry Dash...</div>
+
 <script>
-    launch();
+(function () {
+    const loading = document.getElementById("loading");
 
-    function launch() {
-        const baseHref = document.getElementById("baseTag").href;
+    const url =
+        "https://cdn.jsdelivr.net/gh/web-dashers/web-dashers.github.io@main/index.html?t=" +
+        Date.now();
 
-        fetch("https://cdn.jsdelivr.net/gh/web-dashers/web-dashers.github.io@main/index.html?t=" + Date.now())
-            .then(res => {
-                if (!res.ok) throw new Error("Failed to load Web Dashers: HTTP " + res.status);
-                return res.text();
-            })
-            .then(html => {
-                if (html.includes("<head>")) {
-                    html = html.replace("<head>", `<head><base href="${baseHref}">`);
-                } else {
-                    html = `<base href="${baseHref}">` + html;
+    fetch(url, {
+        method: "GET",
+        cache: "no-store"
+    })
+    .then(function (response) {
+        if (!response.ok) {
+            throw new Error(
+                "Web Dashers returned HTTP " + response.status
+            );
+        }
+
+        return response.text();
+    })
+    .then(function (html) {
+
+        /*
+         * Make sure Web Dashers has the correct base URL.
+         */
+        if (/<head[^>]*>/i.test(html)) {
+            html = html.replace(
+                /<head[^>]*>/i,
+                function (match) {
+                    return match +
+                        '<base href="https://web-dashers.github.io/">';
                 }
-                document.open();
-                document.write(html);
-                document.close();
-            })
-            .catch(error => {
-                console.error("Web Dashers loading error:", error);
-                document.body.innerHTML = '<div style="font-family:sans-serif;color:white;background:#111;min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px"><div><h2>Geometry Dash failed to load</h2><p>' + error.message + '</p></div></div>';
-            });
-    }
+            );
+        } else {
+            html =
+                '<base href="https://web-dashers.github.io/">' +
+                html;
+        }
+
+        /*
+         * Replace this document with the Web Dashers page.
+         */
+        document.open();
+        document.write(html);
+        document.close();
+    })
+    .catch(function (error) {
+        console.error("Geometry Dash loading error:", error);
+
+        loading.innerHTML =
+            "<div style='text-align:center;padding:20px;'>" +
+            "<div style='font-size:22px;margin-bottom:10px;'>" +
+            "Geometry Dash failed to load" +
+            "</div>" +
+            "<div style='font-size:14px;color:#aaa;'>" +
+            error.message +
+            "</div>" +
+            "</div>";
+    });
+})();
 </script>
+
+</body>
+</html>

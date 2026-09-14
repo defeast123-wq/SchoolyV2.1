@@ -456,6 +456,18 @@ html,body{
 .cursor-preview.none{border:0;}.cursor-preview.none:after{content:"↖";font-size:21px;position:absolute;left:3px;top:-1px;color:white;}
 .mod-list{margin-top:12px;display:grid;gap:8px;}.mod-item{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid rgba(255,255,255,.08);border-radius:9px;background:rgba(255,255,255,.025);}.mod-item span{flex:1;font-size:11px;}.danger-btn,.settings-action{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:white;border-radius:8px;padding:9px 12px;cursor:pointer;font-family:inherit;font-size:11px;}.danger-btn:hover{background:rgba(255,70,70,.18);}.settings-action:hover{background:rgba(255,255,255,.11);}
 
+.wallpaper-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+.wallpaper-choice{position:relative;overflow:hidden;min-height:150px;padding:0;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:#09090b;color:white;cursor:pointer;text-align:left;font-family:inherit;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;}
+.wallpaper-choice:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.28);box-shadow:0 12px 30px rgba(0,0,0,.28);}
+.wallpaper-choice.selected{border-color:rgba(255,255,255,.7);box-shadow:0 0 0 2px rgba(255,255,255,.12);}
+.wallpaper-choice video{display:block;width:100%;height:150px;object-fit:cover;pointer-events:none;filter:brightness(.62);}
+.wallpaper-choice::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.8),transparent 65%);pointer-events:none;}
+.wallpaper-label{position:absolute;left:12px;bottom:10px;z-index:2;font-size:12px;font-weight:600;letter-spacing:.03em;}
+.wallpaper-label small{display:block;margin-top:3px;font-size:10px;font-weight:400;color:rgba(255,255,255,.62);}
+body[data-theme="light"] .wallpaper-choice{color:#111;border-color:rgba(0,0,0,.12);background:#fff;}
+body[data-theme="light"] .wallpaper-choice.selected{border-color:rgba(0,0,0,.55);box-shadow:0 0 0 2px rgba(0,0,0,.08);}
+@media(max-width:700px){.wallpaper-grid{grid-template-columns:1fr;}.wallpaper-choice video{height:165px;}}
+
 body[data-theme="light"]{background:#ececec;color:#111;}
 body[data-theme="light"] .bg-video{display:none;} body[data-theme="light"] .overlay{background:radial-gradient(circle at center,rgba(255,255,255,.1),rgba(220,220,220,.72));}
 body[data-theme="light"] .browser-bar{background:rgba(235,235,238,.94);color:#111;} body[data-theme="light"] .browser-tab{color:rgba(0,0,0,.5);} body[data-theme="light"] .browser-tab:hover,body[data-theme="light"] .browser-tab.active{color:#111;background:rgba(0,0,0,.06);}
@@ -2040,6 +2052,7 @@ body.cursor-dot,body.cursor-ring,body.cursor-cross{cursor:none;}body.cursor-dot 
     <div class="settings-body">
         <nav class="settings-nav">
             <button class="active" data-settings-section="appearance">Appearance</button>
+            <button data-settings-section="wallpaper">Wallpaper</button>
             <button data-settings-section="cursor">Custom Cursor</button>
             <button data-settings-section="mods">Mods</button>
             <button data-settings-section="behavior">Behavior</button>
@@ -2059,6 +2072,20 @@ body.cursor-dot,body.cursor-ring,body.cursor-cross{cursor:none;}body.cursor-dot 
                     <button class="theme-button" data-theme-choice="sunset"><div class="theme-preview preview-sunset"></div><strong>Sunset</strong><small>Warm orange/red</small></button>
                     <button class="theme-button" data-theme-choice="cyber"><div class="theme-preview preview-cyber"></div><strong>Cyber</strong><small>Electric blue</small></button>
                     <button class="theme-button" data-theme-choice="rose"><div class="theme-preview preview-rose"></div><strong>Rose</strong><small>Pink neon</small></button>
+                </div>
+            </section>
+
+            <section class="settings-section" id="settings-wallpaper">
+                <h3>Wallpapers</h3>
+                <p>Choose an animated background for Schooly. Your choice is saved automatically.</p>
+                <div class="wallpaper-grid">
+                    <button class="wallpaper-choice" type="button" data-wallpaper-choice="1"><video autoplay muted loop playsinline preload="metadata"><source src="https://images6.alphacoders.com/141/1412895.mp4" type="video/mp4"></video><span class="wallpaper-label">Wallpaper 1<small>Animated background</small></span></button>
+                    <button class="wallpaper-choice" type="button" data-wallpaper-choice="2"><video autoplay muted loop playsinline preload="metadata"><source src="https://images3.alphacoders.com/140/1407968.mp4" type="video/mp4"></video><span class="wallpaper-label">Wallpaper 2<small>Animated background</small></span></button>
+                    <button class="wallpaper-choice" type="button" data-wallpaper-choice="3"><video autoplay muted loop playsinline preload="metadata"><source src="https://images8.alphacoders.com/140/1403934.mp4" type="video/mp4"></video><span class="wallpaper-label">Wallpaper 3<small>Animated background</small></span></button>
+                    <button class="wallpaper-choice" type="button" data-wallpaper-choice="4"><video autoplay muted loop playsinline preload="metadata"><source src="https://images3.alphacoders.com/140/1404942.mp4" type="video/mp4"></video><span class="wallpaper-label">Wallpaper 4<small>Animated background</small></span></button>
+                    <button class="wallpaper-choice" type="button" data-wallpaper-choice="5"><video autoplay muted loop playsinline preload="metadata"><source src="https://images2.alphacoders.com/140/1403318.mp4" type="video/mp4"></video><span class="wallpaper-label">Wallpaper 5<small>Animated background</small></span></button>
+                    <button class="wallpaper-choice" type="button" data-wallpaper-choice="6"><video autoplay muted loop playsinline preload="metadata"><source src="https://images3.alphacoders.com/140/1405696.mp4" type="video/mp4"></video><span class="wallpaper-label">Wallpaper 6<small>Animated background</small></span></button>
+                    <button class="wallpaper-choice" type="button" data-wallpaper-choice="7"><video autoplay muted loop playsinline preload="metadata"><source src="https://images6.alphacoders.com/140/1402536.mp4" type="video/mp4"></video><span class="wallpaper-label">Wallpaper 7<small>Animated background</small></span></button>
                 </div>
             </section>
 
@@ -2915,11 +2942,41 @@ const customCursor = document.getElementById("customCursor");
 
 const SETTINGS_KEY = "schoolySettingsV2";
 let savedSettings = JSON.parse(localStorage.getItem(SETTINGS_KEY) || "null") || {
-    theme:"dark", cursor:"default", particles:true, glow:true, reducedMotion:false,
+    theme:"dark", wallpaper:"original", cursor:"default", particles:true, glow:true, reducedMotion:false,
     rememberPage:false, gameFullscreen:false, gameConfirm:false, mods:[]
 };
 
+// Keep the original Schooly wallpaper as the default.
+if (!savedSettings.wallpaper) savedSettings.wallpaper = "original";
+if (!localStorage.getItem(SETTINGS_KEY + "_wallpaperDefaultUpdated")) {
+    savedSettings.wallpaper = "original";
+    localStorage.setItem(SETTINGS_KEY + "_wallpaperDefaultUpdated", "1");
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(savedSettings));
+}
+
 function saveSettings(){ localStorage.setItem(SETTINGS_KEY, JSON.stringify(savedSettings)); }
+function applyWallpaper(wallpaper){
+    const video=document.querySelector(".bg-video");
+    const source=video ? video.querySelector("source") : null;
+    const wallpapers={
+        1:"https://images6.alphacoders.com/141/1412895.mp4",
+        2:"https://images3.alphacoders.com/140/1407968.mp4",
+        3:"https://images8.alphacoders.com/140/1403934.mp4",
+        4:"https://images3.alphacoders.com/140/1404942.mp4",
+        5:"https://images2.alphacoders.com/140/1403318.mp4",
+        6:"https://images3.alphacoders.com/140/1405696.mp4",
+        7:"https://images6.alphacoders.com/140/1402536.mp4"
+    };
+    const choice = wallpaper === "original" || wallpaper === 0 || wallpaper === "0" ? "original" : Number(wallpaper);
+    const original = "https://motionbgs.com/media/6200/white-toyota-drifting.960x540.mp4";
+    if(video && source){
+        source.src = choice === "original" ? original : (wallpapers[choice] || original);
+        video.load();
+        video.play().catch(()=>{});
+    }
+    savedSettings.wallpaper=choice;
+    saveSettings();
+}
 function applyTheme(theme){
     savedSettings.theme = theme;
     document.body.dataset.theme = theme === "dark" ? "" : theme;
@@ -2943,6 +3000,7 @@ function applyBehavior(){
 function syncSettingsUI(){
     document.querySelectorAll("[data-theme-choice]").forEach(b=>b.style.outline = b.dataset.themeChoice===savedSettings.theme ? "1px solid rgba(255,255,255,.55)" : "none");
     document.querySelectorAll("[data-cursor-choice]").forEach(b=>b.classList.toggle("selected", b.dataset.cursorChoice===savedSettings.cursor));
+    document.querySelectorAll("[data-wallpaper-choice]").forEach(b=>b.classList.toggle("selected", Number(b.dataset.wallpaperChoice)===Number(savedSettings.wallpaper)));
     const map={particlesToggle:"particles",glowToggle:"glow",motionToggle:"reducedMotion",rememberPageToggle:"rememberPage",gameFullscreenToggle:"gameFullscreen",gameConfirmToggle:"gameConfirm"};
     Object.entries(map).forEach(([id,key])=>{const el=document.getElementById(id);if(el)el.checked=!!savedSettings[key];});
 }
@@ -2963,6 +3021,7 @@ document.querySelectorAll("[data-settings-section]").forEach(btn=>btn.addEventLi
 
 document.querySelectorAll("[data-theme-choice]").forEach(btn=>btn.addEventListener("click",()=>{applyTheme(btn.dataset.themeChoice);syncSettingsUI();}));
 document.querySelectorAll("[data-cursor-choice]").forEach(btn=>btn.addEventListener("click",()=>{applyCursor(btn.dataset.cursorChoice);syncSettingsUI();}));
+document.querySelectorAll("[data-wallpaper-choice]").forEach(btn=>btn.addEventListener("click",()=>{applyWallpaper(btn.dataset.wallpaperChoice);syncSettingsUI();}));
 
 ["particlesToggle","glowToggle","motionToggle","rememberPageToggle","gameFullscreenToggle","gameConfirmToggle"].forEach(id=>{
     const el=document.getElementById(id); el.addEventListener("change",()=>{
@@ -3018,7 +3077,7 @@ window.addEventListener("mousemove",e=>{
 });
 window.addEventListener("mouseup",()=>dragging=false);
 
-applyTheme(savedSettings.theme); applyCursor(savedSettings.cursor); applyBehavior(); applyMods();
+applyTheme(savedSettings.theme); applyWallpaper(savedSettings.wallpaper || 1); applyCursor(savedSettings.cursor); applyBehavior(); applyMods();
 
 /* =========================================================
    PAGE SYSTEM
